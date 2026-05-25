@@ -5,6 +5,7 @@ const route = useRoute()
 
 const navGroups = [
   {
+<<<<<<< HEAD
     title: '概览',
     items: [
       { label: '总览', path: '/dashboard' },
@@ -24,6 +25,27 @@ const navGroups = [
       { label: '账户', path: '/account' },
       { label: '提醒', path: '/alerts' },
       { label: '设置', path: '/settings' },
+=======
+    title: 'Overview',
+    items: [
+      { label: 'Dashboard', path: '/dashboard' },
+      { label: 'Market', path: '/market' },
+    ],
+  },
+  {
+    title: 'Trading',
+    items: [
+      { label: 'Trade Ticket', path: '/trade' },
+      { label: 'Orders', path: '/orders' },
+    ],
+  },
+  {
+    title: 'Account',
+    items: [
+      { label: 'Account', path: '/account' },
+      { label: 'Alerts', path: '/alerts' },
+      { label: 'Settings', path: '/settings' },
+>>>>>>> origin/master
     ],
   },
 ]
@@ -36,8 +58,13 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
     <div class="brand">
       <div class="brand-mark"></div>
       <div>
+<<<<<<< HEAD
         <div class="brand-title">栖木交易</div>
         <div class="brand-subtitle">交易客户端</div>
+=======
+        <div class="brand-title">Arbor Trade</div>
+        <div class="brand-subtitle">Client Console</div>
+>>>>>>> origin/master
       </div>
     </div>
 
@@ -57,9 +84,15 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
     </nav>
 
     <div class="nav-footer card">
+<<<<<<< HEAD
       <div class="nav-footer-title">交易日</div>
       <div class="nav-footer-value">2026-05-25</div>
       <p class="nav-footer-note">交易时段 09:30 - 15:00</p>
+=======
+      <div class="nav-footer-title">Trading Day</div>
+      <div class="nav-footer-value">May 25, 2026</div>
+      <p class="nav-footer-note">Session open 09:30 - 15:00</p>
+>>>>>>> origin/master
     </div>
   </aside>
 </template>

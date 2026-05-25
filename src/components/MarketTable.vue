@@ -2,7 +2,11 @@
 const stocks = [
   {
     symbol: 'QST',
+<<<<<<< HEAD
     name: '石英系统',
+=======
+    name: 'Quartz Systems',
+>>>>>>> origin/master
     last: '112.40',
     high: '118.20',
     low: '109.80',
@@ -12,7 +16,11 @@ const stocks = [
   },
   {
     symbol: 'NVA',
+<<<<<<< HEAD
     name: '新星出行',
+=======
+    name: 'Nova Mobility',
+>>>>>>> origin/master
     last: '86.12',
     high: '90.40',
     low: '84.60',
@@ -22,7 +30,11 @@ const stocks = [
   },
   {
     symbol: 'LUM',
+<<<<<<< HEAD
     name: '流明食品',
+=======
+    name: 'Lumen Foods',
+>>>>>>> origin/master
     last: '24.98',
     high: '25.70',
     low: '24.10',
@@ -35,6 +47,7 @@ const stocks = [
 
 <template>
   <div class="card">
+<<<<<<< HEAD
     <div class="card-title">行情看板</div>
     <div class="card-subtitle">买一卖一与价格区间</div>
     <table class="table">
@@ -47,6 +60,20 @@ const stocks = [
           <th>买一</th>
           <th>卖一</th>
           <th>成交量</th>
+=======
+    <div class="card-title">Market Board</div>
+    <div class="card-subtitle">Best bid, best ask, and price bands</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Last</th>
+          <th>High</th>
+          <th>Low</th>
+          <th>Bid</th>
+          <th>Ask</th>
+          <th>Volume</th>
+>>>>>>> origin/master
         </tr>
       </thead>
       <tbody>
