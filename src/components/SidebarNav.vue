@@ -5,7 +5,6 @@ const route = useRoute()
 
 const navGroups = [
   {
-<<<<<<< HEAD
     title: '概览',
     items: [
       { label: '总览', path: '/dashboard' },
@@ -25,27 +24,6 @@ const navGroups = [
       { label: '账户', path: '/account' },
       { label: '提醒', path: '/alerts' },
       { label: '设置', path: '/settings' },
-=======
-    title: 'Overview',
-    items: [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'Market', path: '/market' },
-    ],
-  },
-  {
-    title: 'Trading',
-    items: [
-      { label: 'Trade Ticket', path: '/trade' },
-      { label: 'Orders', path: '/orders' },
-    ],
-  },
-  {
-    title: 'Account',
-    items: [
-      { label: 'Account', path: '/account' },
-      { label: 'Alerts', path: '/alerts' },
-      { label: 'Settings', path: '/settings' },
->>>>>>> origin/master
     ],
   },
 ]
@@ -58,13 +36,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
     <div class="brand">
       <div class="brand-mark"></div>
       <div>
-<<<<<<< HEAD
         <div class="brand-title">栖木交易</div>
         <div class="brand-subtitle">交易客户端</div>
-=======
-        <div class="brand-title">Arbor Trade</div>
-        <div class="brand-subtitle">Client Console</div>
->>>>>>> origin/master
       </div>
     </div>
 
@@ -84,15 +57,9 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
     </nav>
 
     <div class="nav-footer card">
-<<<<<<< HEAD
       <div class="nav-footer-title">交易日</div>
       <div class="nav-footer-value">2026-05-25</div>
       <p class="nav-footer-note">交易时段 09:30 - 15:00</p>
-=======
-      <div class="nav-footer-title">Trading Day</div>
-      <div class="nav-footer-value">May 25, 2026</div>
-      <p class="nav-footer-note">Session open 09:30 - 15:00</p>
->>>>>>> origin/master
     </div>
   </aside>
 </template>
@@ -104,8 +71,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
   align-self: start;
   min-height: 100vh;
   padding: 28px 22px 32px;
-  background: rgba(255, 250, 243, 0.92);
-  border-right: 1px solid var(--border);
+  background: var(--color-bg-aside);
+  border-right: 1px solid var(--color-border-light);
   backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
@@ -121,8 +88,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 .brand-mark {
   width: 42px;
   height: 42px;
-  border-radius: 14px;
-  background: conic-gradient(from 210deg, #1f7a5d, #f4a261, #1f7a5d);
+  border-radius: 0;
+  background: #000000;
 }
 
 .brand-title {
@@ -160,7 +127,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: 0;
   font-weight: 600;
   color: var(--ink);
   background: transparent;
@@ -168,19 +135,19 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 }
 
 .nav-link:hover {
-  background: rgba(31, 122, 93, 0.08);
+  background: var(--color-bg-main);
   transform: translateX(2px);
 }
 
 .nav-link.active {
-  background: rgba(31, 122, 93, 0.16);
-  color: var(--primary-ink);
+  background: var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .nav-indicator {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--accent);
   opacity: 0.6;
 }

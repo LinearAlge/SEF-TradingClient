@@ -1,0 +1,400 @@
+/* 
+ * Swiss Design Style Guide - Modern Black & White Aesthetic 
+ */
+
+/* 1. Global Color Variables */
+:root {
+  --color-bg-main: #F4F5F6;     /* Light background */
+  --color-bg-header: #FFFFFF;   /* Header background */
+  --color-bg-aside: #FFFFFF;    /* Sidebar background */
+  --color-bg-card: #FFFFFF;     /* Card background */
+  --color-border: #E5E7EB;      /* Border color */
+  --color-border-dark: #000000; /* Dark border */
+  --color-border-light: #EAEAEA; 
+  --color-text-primary: #111111; 
+  --color-text-muted: #6B7280;   
+}
+
+/* 2. Global Reset & Typography */
+html, body, #app, .el-container, button, input, select, textarea {
+  font-family: 'Inter', -apple-system, 'BlinkMacSystemFont', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em !important; 
+}
+
+/* Monospace fonts for data display */
+.monospace-data, 
+:deep(.el-table) {
+  font-family: 'Inter', 'SF Mono', 'JetBrains Mono', 'Courier New', monospace !important;
+  letter-spacing: 0px !important;
+}
+
+/* Main container background */
+body .el-main {
+  background-color: var(--color-bg-main) !important;
+  padding: 40px !important;
+}
+
+/* 3. Sidebar Navigation */
+body .el-aside {
+  background-color: var(--color-bg-aside) !important;
+  border-right: 1px solid var(--color-border-light) !important;
+}
+
+body .el-menu {
+  background-color: transparent !important;
+  border-right: none !important;
+}
+
+body .el-menu-item, 
+body .el-sub-menu__title {
+  color: var(--color-text-muted) !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+body .el-menu-item:hover, 
+body .el-sub-menu__title:hover {
+  background-color: var(--color-bg-main) !important; 
+  color: var(--color-text-primary) !important;
+}
+
+body .el-menu-item.is-active {
+  color: var(--color-text-primary) !important;
+  font-weight: 700 !important;
+  background-color: var(--color-border) !important;
+}
+
+body .el-menu-item:focus,
+body .el-sub-menu__title:focus {
+  background-color: transparent !important;
+}
+
+/* 4. Header */
+body .el-header {
+  background-color: var(--color-bg-header) !important;
+  border-bottom: 1px solid var(--color-border-light) !important;
+}
+
+/* 5. Cards - Square corners, clean look */
+body .el-card {
+  border-radius: 0px !important;
+  background-color: var(--color-bg-card) !important;
+  border: 1px solid rgba(0, 0, 0, 0.03) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.015), 0 2px 8px -1px rgba(0, 0, 0, 0.01) !important;
+  animation: appleCardRise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0; 
+  will-change: transform, opacity;
+}
+
+/* 6. Input Fields */
+body .el-input__wrapper, 
+body .el-select__wrapper, 
+body .el-textarea__inner {
+  border-radius: 0px !important;
+  background-color: var(--color-bg-card) !important;
+  box-shadow: 0 0 0 1px var(--color-border) inset !important;
+  transition: box-shadow 0.15s ease-in-out !important;
+}
+
+body .el-input__wrapper.is-focus, 
+body .el-select__wrapper.is-focused,
+body .el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--color-border-dark) !important;
+}
+
+/* Select dropdown styles */
+body .el-select-dropdown__item.hover,
+body .el-select-dropdown__item:hover {
+  background-color: #F3F4F6 !important;
+  color: var(--color-text-primary) !important;
+}
+
+body .el-select-dropdown__item.selected {
+  background-color: var(--color-bg-main) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* 7. Buttons */
+body .el-button:not(.el-button--text):not(.is-link) {
+  border-radius: 0px !important;
+  height: auto !important;
+  font-weight: 600 !important;
+}
+
+body .btn-primary,
+body .el-button--primary {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  border-radius: 0px !important;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out !important;
+}
+
+body .btn-primary:hover,
+body .el-button--primary:hover {
+  background-color: #1f2937 !important;
+  border-color: #1f2937 !important;
+  color: #ffffff !important;
+}
+
+body .btn-secondary,
+body .el-button--default {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 0px !important;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+}
+
+body .btn-secondary:hover,
+body .el-button--default:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+body .btn-primary,
+body .btn-secondary {
+  box-sizing: border-box !important;
+}
+
+/* 8. Table Styles */
+body .el-table {
+  border-radius: 0px !important;
+  border: none !important;
+}
+
+body .el-table__header-wrapper {
+  border-top: 2px solid var(--color-border-dark) !important;
+  border-bottom: 1px solid var(--color-border-dark) !important;
+}
+
+body .el-table th {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-muted) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em !important;
+}
+
+body .el-table td {
+  border-bottom: 1px solid #F3F4F6 !important;
+}
+
+body .el-table__row {
+  height: 54px !important;
+}
+
+body .el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: #FAFAFA !important;
+}
+
+/* 9. Custom Input Groups */
+.input-group-custom {
+  border: 1px solid var(--color-border-dark);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-card);
+}
+
+.input-label-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: #F3F4F6;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-group-custom .el-input__wrapper {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 8px 12px !important;
+}
+
+/* 10. Status Bar Components */
+.meta-status-bar {
+  display: flex;
+  gap: 48px;
+  border-bottom: 2px solid var(--color-border-dark);
+  padding-bottom: 16px;
+  margin-bottom: 32px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-light);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-top: 4px;
+}
+
+/* 11. Link Styles */
+.detail-link {
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: color 0.2s ease;
+}
+
+.detail-link .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.detail-link:hover {
+  color: var(--color-text-muted);
+}
+
+.detail-link:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* 12. Dropdown Menu Styles */
+.apple-nav-trigger {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111111;
+  padding: 0 16px;
+  transition: color 0.2s ease;
+}
+
+.apple-mega-dropdown {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 100vw;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+  z-index: 999;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.2s ease-in-out !important;
+}
+
+.apple-mega-dropdown.is-active {
+  max-height: 450px;
+  opacity: 1;
+}
+
+.mega-content-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 50px;
+  display: grid;
+  grid-template-columns: repeat(3, 280px);
+  gap: 60px;
+}
+
+.mega-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.column-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.mega-link {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111111;
+  text-decoration: none;
+  margin-bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.mega-link .arrow {
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: all 0.2s ease;
+  margin-left: 6px;
+}
+
+.mega-link:hover {
+  color: #6B7280 !important;
+}
+
+.mega-link:hover .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Overlay */
+.apple-blur-overlay {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - 60px);
+  background: rgba(0, 0, 0, 0.01) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 990;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease !important;
+}
+
+.apple-blur-overlay.is-active {
+  opacity: 1;
+}
+
+/* 13. Animation */
+@keyframes appleCardRise {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delay-1 {
+  animation-delay: 0.1s !important;
+}
+
+.delay-2 {
+  animation-delay: 0.2s !important;
+}

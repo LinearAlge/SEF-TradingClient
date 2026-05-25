@@ -74,7 +74,7 @@
 .brand-dot {
   width: 14px;
   height: 14px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--accent);
 }
 
