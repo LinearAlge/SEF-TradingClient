@@ -5,8 +5,8 @@ const props = withDefaults(
     subtitle?: string
   }>(),
   {
-    title: 'Orders',
-    subtitle: 'Latest activity across markets',
+    title: '委托',
+    subtitle: '跨市场最新动态',
   },
 )
 
@@ -14,40 +14,40 @@ const orders = [
   {
     id: 'ORD-1024',
     symbol: 'QST',
-    side: 'Buy',
+    side: '买入',
     price: '112.20',
     qty: 300,
-    status: 'Open',
+    status: '未成交',
   },
   {
     id: 'ORD-1019',
     symbol: 'NVA',
-    side: 'Sell',
+    side: '卖出',
     price: '86.50',
     qty: 120,
-    status: 'Partial',
+    status: '部分成交',
   },
   {
     id: 'ORD-1013',
     symbol: 'LUM',
-    side: 'Buy',
+    side: '买入',
     price: '24.80',
     qty: 500,
-    status: 'Filled',
+    status: '已成交',
   },
   {
     id: 'ORD-1002',
     symbol: 'SRF',
-    side: 'Sell',
+    side: '卖出',
     price: '73.90',
     qty: 260,
-    status: 'Canceled',
+    status: '已撤单',
   },
 ]
 
 const statusTone = (status: string) => {
-  if (status === 'Filled') return 'tag-positive'
-  if (status === 'Canceled') return 'tag-negative'
+  if (status === '已成交') return 'tag-positive'
+  if (status === '已撤单') return 'tag-negative'
   return ''
 }
 </script>
@@ -59,12 +59,12 @@ const statusTone = (status: string) => {
     <table class="table">
       <thead>
         <tr>
-          <th>Order</th>
-          <th>Symbol</th>
-          <th>Side</th>
-          <th>Price</th>
-          <th>Qty</th>
-          <th>Status</th>
+          <th>委托号</th>
+          <th>代码</th>
+          <th>方向</th>
+          <th>价格</th>
+          <th>数量</th>
+          <th>状态</th>
         </tr>
       </thead>
       <tbody>

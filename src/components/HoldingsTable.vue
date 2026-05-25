@@ -2,7 +2,7 @@
 const holdings = [
   {
     symbol: 'QST',
-    name: 'Quartz Systems',
+    name: '石英系统',
     shares: 860,
     cost: '104.32',
     last: '112.40',
@@ -10,7 +10,7 @@ const holdings = [
   },
   {
     symbol: 'NVA',
-    name: 'Nova Mobility',
+    name: '新星出行',
     shares: 420,
     cost: '88.10',
     last: '86.12',
@@ -18,7 +18,7 @@ const holdings = [
   },
   {
     symbol: 'LUM',
-    name: 'Lumen Foods',
+    name: '流明食品',
     shares: 1200,
     cost: '23.80',
     last: '24.98',
@@ -29,16 +29,16 @@ const holdings = [
 
 <template>
   <div class="card">
-    <div class="card-title">Holdings</div>
-    <div class="card-subtitle">Positions linked to your securities account</div>
+    <div class="card-title">持仓</div>
+    <div class="card-subtitle">证券账户关联持仓</div>
     <table class="table">
       <thead>
         <tr>
-          <th>Symbol</th>
-          <th>Shares</th>
-          <th>Cost</th>
-          <th>Last</th>
-          <th>PnL</th>
+          <th>代码</th>
+          <th>股数</th>
+          <th>成本</th>
+          <th>最新价</th>
+          <th>盈亏</th>
         </tr>
       </thead>
       <tbody>

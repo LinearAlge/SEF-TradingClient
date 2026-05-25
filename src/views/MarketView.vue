@@ -6,10 +6,10 @@ import PriceTicker from '../components/PriceTicker.vue'
 </script>
 
 <template>
-  <AppShell title="Market Snapshot" subtitle="Live quotes, best bid, and best ask">
+  <AppShell title="行情中心" subtitle="最新成交、买一卖一与区间">
     <template #actions>
-      <button class="btn btn-primary" type="button">Create Alert</button>
-      <button class="btn btn-ghost" type="button">Download Quotes</button>
+      <button class="btn btn-primary" type="button">创建提醒</button>
+      <button class="btn btn-ghost" type="button">下载行情</button>
     </template>
 
     <StockSearchPanel />

@@ -2,26 +2,26 @@
 const alerts = [
   {
     symbol: 'QST',
-    trigger: 'Price above 115.00',
-    status: 'Monitoring',
+    trigger: '价格高于 115.00',
+    status: '监控中',
   },
   {
     symbol: 'NVA',
-    trigger: 'Price below 84.50',
-    status: 'Monitoring',
+    trigger: '价格低于 84.50',
+    status: '监控中',
   },
   {
     symbol: 'LUM',
-    trigger: 'Volume spike over 3M',
-    status: 'Paused',
+    trigger: '成交量超过 300 万',
+    status: '已暂停',
   },
 ]
 </script>
 
 <template>
   <div class="card">
-    <div class="card-title">Price Alerts</div>
-    <div class="card-subtitle">Optional reminders for key levels</div>
+    <div class="card-title">价格提醒</div>
+    <div class="card-subtitle">自定义触发条件</div>
     <ul class="alert-list">
       <li v-for="alert in alerts" :key="alert.symbol" class="alert-item">
         <div>

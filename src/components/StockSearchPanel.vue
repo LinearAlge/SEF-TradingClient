@@ -1,41 +1,41 @@
 <script setup lang="ts">
 const filters = [
-  { label: 'Today', active: true },
-  { label: 'Week', active: false },
-  { label: 'Month', active: false },
-  { label: 'Quarter', active: false },
+  { label: '今日', active: true },
+  { label: '本周', active: false },
+  { label: '本月', active: false },
+  { label: '本季', active: false },
 ]
 </script>
 
 <template>
   <div class="card search-panel">
     <div>
-      <div class="card-title">Stock Lookup</div>
-      <div class="card-subtitle">Find price bands, best bid, and best ask</div>
+      <div class="card-title">股票查询</div>
+      <div class="card-subtitle">查看最高最低、买一卖一</div>
     </div>
     <div class="search-grid">
       <label class="field">
-        Symbol or Name
-        <input class="input" placeholder="Search QST or Quartz" />
+        代码或名称
+        <input class="input" placeholder="例如 QST 或 石英" />
       </label>
       <label class="field">
-        Exchange
+        交易板块
         <select class="select">
-          <option>Main Board</option>
-          <option>Growth</option>
-          <option>ST Board</option>
+          <option>主板</option>
+          <option>创业板</option>
+          <option>ST 板</option>
         </select>
       </label>
       <label class="field">
-        Quote Refresh
+        行情刷新
         <select class="select">
-          <option>5 seconds</option>
-          <option>15 seconds</option>
-          <option>30 seconds</option>
+          <option>5 秒</option>
+          <option>15 秒</option>
+          <option>30 秒</option>
         </select>
       </label>
       <div class="field">
-        Range
+        区间
         <div class="filter-row">
           <button
             v-for="item in filters"
@@ -50,8 +50,8 @@ const filters = [
       </div>
     </div>
     <div class="search-actions">
-      <button class="btn btn-ghost" type="button">Reset</button>
-      <button class="btn btn-primary" type="button">Run Query</button>
+      <button class="btn btn-ghost" type="button">重置</button>
+      <button class="btn btn-primary" type="button">查询</button>
     </div>
   </div>
 </template>

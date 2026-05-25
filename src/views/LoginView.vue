@@ -3,42 +3,42 @@
     <div class="login-left">
       <div class="login-brand">
         <span class="brand-dot"></span>
-        Arbor Trade
+        栖木交易
       </div>
-      <h1>Trade with clarity.</h1>
+      <h1>清晰掌控交易。</h1>
       <p class="login-copy">
-        Monitor cash, holdings, and live orders in one unified trading client.
+        在统一的交易客户端中查看资金、持仓与委托。
       </p>
       <div class="login-chips">
-        <span class="chip">Realtime quotes</span>
-        <span class="chip">Risk-aware limits</span>
-        <span class="chip">Instant confirmations</span>
+        <span class="chip">实时行情</span>
+        <span class="chip">限价风控</span>
+        <span class="chip">成交回执</span>
       </div>
-      <div class="login-footnote">Central matching engine ready.</div>
+      <div class="login-footnote">撮合引擎已就绪</div>
     </div>
 
     <div class="login-card card">
-      <h2>Sign in</h2>
-      <p class="card-subtitle">Use your settlement account credentials.</p>
+      <h2>登录</h2>
+      <p class="card-subtitle">使用资金账户登录。</p>
       <form class="login-form">
         <label class="field">
-          Account ID
-          <input class="input" placeholder="Enter account number" />
+          账户号
+          <input class="input" placeholder="请输入账户号" />
         </label>
         <label class="field">
-          Trading Password
-          <input class="input" type="password" placeholder="Enter password" />
+          交易密码
+          <input class="input" type="password" placeholder="请输入密码" />
         </label>
         <label class="field">
-          Certificate
+          安全证书
           <select class="select">
-            <option>Primary certificate</option>
-            <option>Backup certificate</option>
+            <option>主证书</option>
+            <option>备用证书</option>
           </select>
         </label>
         <div class="login-actions">
-          <button class="btn btn-ghost" type="button">Request access</button>
-          <RouterLink class="btn btn-primary" to="/dashboard">Enter workspace</RouterLink>
+          <button class="btn btn-ghost" type="button">申请权限</button>
+          <RouterLink class="btn btn-primary" to="/dashboard">进入工作台</RouterLink>
         </div>
       </form>
     </div>

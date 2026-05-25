@@ -1,27 +1,27 @@
 <script setup lang="ts">
 const metrics = [
   {
-    label: 'Available Cash',
+    label: '可用资金',
     value: '$128,420',
-    note: 'Ready for new buy orders',
+    note: '用于新买入委托',
   },
   {
-    label: 'Frozen Funds',
+    label: '冻结资金',
     value: '$18,600',
-    note: 'Reserved for open orders',
+    note: '用于未成交委托',
   },
   {
-    label: 'Total Equity',
+    label: '总资产',
     value: '$412,890',
-    note: 'Cash plus market value',
+    note: '现金与市值合计',
   },
 ]
 </script>
 
 <template>
   <div class="card">
-    <div class="card-title">Funds Summary</div>
-    <div class="card-subtitle">Linked settlement account</div>
+    <div class="card-title">资金概览</div>
+    <div class="card-subtitle">结算资金账户</div>
     <div class="metrics">
       <div v-for="item in metrics" :key="item.label" class="metric">
         <div class="metric-label">{{ item.label }}</div>

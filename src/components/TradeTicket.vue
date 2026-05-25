@@ -5,8 +5,8 @@ const props = defineProps<{
   mode: 'buy' | 'sell'
 }>()
 
-const heading = computed(() => (props.mode === 'buy' ? 'Buy Order' : 'Sell Order'))
-const chipLabel = computed(() => (props.mode === 'buy' ? 'Funds' : 'Holdings'))
+const heading = computed(() => (props.mode === 'buy' ? '买入委托' : '卖出委托'))
+const chipLabel = computed(() => (props.mode === 'buy' ? '资金' : '持仓'))
 </script>
 
 <template>
@@ -14,46 +14,46 @@ const chipLabel = computed(() => (props.mode === 'buy' ? 'Funds' : 'Holdings'))
     <div class="ticket-header">
       <div>
         <div class="card-title">{{ heading }}</div>
-        <div class="card-subtitle">Route to the central matching system</div>
+        <div class="card-subtitle">提交到撮合系统</div>
       </div>
       <div class="chip">{{ chipLabel }} linked</div>
     </div>
 
     <form class="ticket-form">
       <label class="field">
-        Symbol
-        <input class="input" placeholder="e.g. QST" />
+        股票代码
+        <input class="input" placeholder="例如 QST" />
       </label>
       <label class="field">
-        Order Type
+        委托类型
         <select class="select">
-          <option>Limit</option>
-          <option>Market</option>
-          <option>Stop</option>
+          <option>限价</option>
+          <option>市价</option>
+          <option>止损</option>
         </select>
       </label>
       <label class="field">
-        Price
+        价格
         <input class="input" placeholder="112.40" />
       </label>
       <label class="field">
-        Quantity
+        数量
         <input class="input" placeholder="100" />
       </label>
       <label class="field">
-        Validity
+        有效期
         <select class="select">
-          <option>Day</option>
-          <option>Good till canceled</option>
+          <option>当日有效</option>
+          <option>撤销前有效</option>
         </select>
       </label>
       <label class="field">
-        Notes
-        <textarea class="textarea" rows="3" placeholder="Optional instruction"></textarea>
+        备注
+        <textarea class="textarea" rows="3" placeholder="可选备注"></textarea>
       </label>
       <div class="ticket-actions">
-        <button class="btn btn-ghost" type="button">Preview</button>
-        <button class="btn btn-primary" type="button">Submit Order</button>
+        <button class="btn btn-ghost" type="button">预览</button>
+        <button class="btn btn-primary" type="button">提交委托</button>
       </div>
     </form>
   </div>
