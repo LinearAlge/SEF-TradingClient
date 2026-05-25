@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const metrics = [
   {
-<<<<<<< HEAD
     label: '可用资金',
     value: '$128,420',
     note: '用于新买入委托',
@@ -15,21 +14,6 @@ const metrics = [
     label: '总资产',
     value: '$412,890',
     note: '现金与市值合计',
-=======
-    label: 'Available Cash',
-    value: '$128,420',
-    note: 'Ready for new buy orders',
-  },
-  {
-    label: 'Frozen Funds',
-    value: '$18,600',
-    note: 'Reserved for open orders',
-  },
-  {
-    label: 'Total Equity',
-    value: '$412,890',
-    note: 'Cash plus market value',
->>>>>>> origin/master
   },
 ]
 </script>
@@ -61,8 +45,8 @@ const metrics = [
 
 .metric {
   padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(31, 122, 93, 0.08);
+  border-radius: 0;
+  background: var(--color-bg-main);
 }
 
 .metric-label {

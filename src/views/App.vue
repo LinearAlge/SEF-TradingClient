@@ -2,33 +2,22 @@
 
 <template>
   <div class="app-root">
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-grid"></div>
     <RouterView />
   </div>
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   color-scheme: light;
-  font-family: 'Space Grotesk', 'IBM Plex Sans', 'Segoe UI', sans-serif;
-  --bg: #f6f1e9;
-  --bg-alt: #fff6e9;
-  --panel: #fffaf3;
-  --ink: #1f2623;
-  --muted: #5e6b60;
-  --primary: #1f7a5d;
-  --primary-ink: #0f3d2d;
-  --accent: #f4a261;
-  --accent-ink: #7b3a06;
-  --border: #e3d6c6;
-  --shadow: 0 24px 60px rgba(31, 38, 35, 0.12);
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
+  --ink: var(--color-text-primary);
+  --muted: var(--color-text-muted);
+  --border: var(--color-border);
+  --accent: #000000;
+  --primary-ink: var(--color-text-primary);
+  --accent-positive: #15803d;
+  --accent-negative: #b91c1c;
 }
 
 * {
@@ -38,9 +27,9 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--ink);
-  letter-spacing: 0.1px;
+  background: var(--color-bg-main);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -53,108 +42,82 @@ button {
 }
 
 .app-root {
-  position: relative;
   min-height: 100vh;
-  overflow: hidden;
-  padding-bottom: 60px;
-}
-
-.bg-orb {
-  position: fixed;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  filter: blur(0px);
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.orb-1 {
-  top: -120px;
-  left: -120px;
-  background: radial-gradient(circle at 30% 30%, #ffd3a5, transparent 70%);
-}
-
-.orb-2 {
-  bottom: -140px;
-  right: -140px;
-  background: radial-gradient(circle at 70% 40%, #b8f2dc, transparent 65%);
-}
-
-.bg-grid {
-  position: fixed;
-  inset: 0;
-  background-image: linear-gradient(to right, rgba(31, 38, 35, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(31, 38, 35, 0.04) 1px, transparent 1px);
-  background-size: 80px 80px;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.5;
+  padding-bottom: 40px;
+  background: var(--color-bg-main);
 }
 
 .page {
-  position: relative;
-  z-index: 1;
-  padding: 32px 40px 64px;
+  padding: 40px;
 }
 
 .card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
+  background: var(--color-bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 0;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.015), 0 2px 8px -1px rgba(0, 0, 0, 0.01);
   padding: 20px 22px;
-  animation: rise 0.6s ease both;
+  animation: appleCardRise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
 }
 
 .card-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   margin: 0 0 6px;
 }
 
 .card-subtitle {
   font-size: 13px;
-  color: var(--muted);
+  color: var(--color-text-muted);
   margin: 0 0 14px;
 }
 
 .btn {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--ink);
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  color: var(--color-text-primary);
   padding: 10px 16px;
-  border-radius: 999px;
+  border-radius: 0;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(31, 38, 35, 0.12);
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: #f5fff9;
-  border-color: transparent;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+}
+
+.btn-primary:hover {
+  background: #1f2937;
+  border-color: #1f2937;
 }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.6);
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+}
+
+.btn-ghost:hover {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(31, 122, 93, 0.12);
-  color: var(--primary-ink);
+  padding: 6px 10px;
+  border-radius: 0;
+  border: 1px solid var(--color-border-dark);
+  background: #ffffff;
+  color: var(--color-text-primary);
   font-size: 12px;
   font-weight: 600;
 }
@@ -164,25 +127,26 @@ button {
   flex-direction: column;
   gap: 6px;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .input,
 .select,
 .textarea {
-  border: 1px solid var(--border);
-  background: #fffdf7;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
   padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   font-size: 14px;
-  color: var(--ink);
+  color: var(--color-text-primary);
 }
 
 .input:focus,
 .select:focus,
 .textarea:focus {
-  outline: 2px solid rgba(31, 122, 93, 0.2);
-  border-color: rgba(31, 122, 93, 0.6);
+  outline: none;
+  border-color: var(--color-border-dark);
+  box-shadow: 0 0 0 1px var(--color-border-dark);
 }
 
 .grid {
@@ -204,39 +168,33 @@ button {
   font-size: 14px;
 }
 
+.table thead tr {
+  border-top: 2px solid var(--color-border-dark);
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
 .table th,
 .table td {
   text-align: left;
   padding: 10px 6px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .table th {
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
 }
 
 .tag-positive {
-  color: #1b7f5d;
+  color: var(--accent-positive);
   font-weight: 600;
 }
 
 .tag-negative {
-  color: #b4552d;
+  color: var(--accent-negative);
   font-weight: 600;
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media (max-width: 900px) {

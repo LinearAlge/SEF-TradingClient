@@ -1,28 +1,16 @@
 <script setup lang="ts">
 const tickers = [
-<<<<<<< HEAD
   { symbol: 'QST', name: '石英系统', price: '112.40', change: '+1.8%', tone: 'positive' },
   { symbol: 'NVA', name: '新星出行', price: '86.12', change: '-0.6%', tone: 'negative' },
   { symbol: 'LUM', name: '流明食品', price: '24.98', change: '+0.2%', tone: 'positive' },
   { symbol: 'SRF', name: '冲浪实验室', price: '74.31', change: '+2.1%', tone: 'positive' },
-=======
-  { symbol: 'QST', name: 'Quartz Systems', price: '112.40', change: '+1.8%', tone: 'positive' },
-  { symbol: 'NVA', name: 'Nova Mobility', price: '86.12', change: '-0.6%', tone: 'negative' },
-  { symbol: 'LUM', name: 'Lumen Foods', price: '24.98', change: '+0.2%', tone: 'positive' },
-  { symbol: 'SRF', name: 'Surfer Labs', price: '74.31', change: '+2.1%', tone: 'positive' },
->>>>>>> origin/master
 ]
 </script>
 
 <template>
   <div class="card">
-<<<<<<< HEAD
     <div class="card-title">市场脉动</div>
     <div class="card-subtitle">活跃标的实时快照</div>
-=======
-    <div class="card-title">Market Pulse</div>
-    <div class="card-subtitle">Realtime snapshot of active symbols</div>
->>>>>>> origin/master
     <ul class="ticker-list">
       <li v-for="item in tickers" :key="item.symbol" class="ticker-item">
         <div>

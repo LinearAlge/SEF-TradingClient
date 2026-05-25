@@ -13,11 +13,7 @@ defineProps<{
     </div>
     <div class="tools">
       <div class="search">
-<<<<<<< HEAD
         <input class="input" placeholder="搜索股票代码、账户或委托" />
-=======
-        <input class="input" placeholder="Search ticker, account, or order" />
->>>>>>> origin/master
       </div>
       <div class="actions">
         <slot name="actions" />
