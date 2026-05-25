@@ -20,13 +20,8 @@ const metrics = [
 
 <template>
   <div class="card">
-<<<<<<< HEAD
     <div class="card-title">资金概览</div>
     <div class="card-subtitle">结算资金账户</div>
-=======
-    <div class="card-title">Funds Summary</div>
-    <div class="card-subtitle">Linked settlement account</div>
->>>>>>> origin/master
     <div class="metrics">
       <div v-for="item in metrics" :key="item.label" class="metric">
         <div class="metric-label">{{ item.label }}</div>
