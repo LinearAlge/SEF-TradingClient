@@ -3,7 +3,6 @@
     <div class="login-left">
       <div class="login-brand">
         <span class="brand-dot"></span>
-<<<<<<< HEAD
         栖木交易
       </div>
       <h1>清晰掌控交易。</h1>
@@ -40,44 +39,6 @@
         <div class="login-actions">
           <button class="btn btn-ghost" type="button">申请权限</button>
           <RouterLink class="btn btn-primary" to="/dashboard">进入工作台</RouterLink>
-=======
-        Arbor Trade
-      </div>
-      <h1>Trade with clarity.</h1>
-      <p class="login-copy">
-        Monitor cash, holdings, and live orders in one unified trading client.
-      </p>
-      <div class="login-chips">
-        <span class="chip">Realtime quotes</span>
-        <span class="chip">Risk-aware limits</span>
-        <span class="chip">Instant confirmations</span>
-      </div>
-      <div class="login-footnote">Central matching engine ready.</div>
-    </div>
-
-    <div class="login-card card">
-      <h2>Sign in</h2>
-      <p class="card-subtitle">Use your settlement account credentials.</p>
-      <form class="login-form">
-        <label class="field">
-          Account ID
-          <input class="input" placeholder="Enter account number" />
-        </label>
-        <label class="field">
-          Trading Password
-          <input class="input" type="password" placeholder="Enter password" />
-        </label>
-        <label class="field">
-          Certificate
-          <select class="select">
-            <option>Primary certificate</option>
-            <option>Backup certificate</option>
-          </select>
-        </label>
-        <div class="login-actions">
-          <button class="btn btn-ghost" type="button">Request access</button>
-          <RouterLink class="btn btn-primary" to="/dashboard">Enter workspace</RouterLink>
->>>>>>> origin/master
         </div>
       </form>
     </div>
