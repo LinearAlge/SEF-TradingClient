@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -28,13 +29,57 @@ const navGroups = [
   },
 ]
 
+const iconMap: Record<string, string> = {
+  '/dashboard': '/首页.png',
+  '/market': '/行情.png',
+  '/trade': '/交易.png',
+  '/orders': '/委托成交.png',
+  '/account': '/资产.png',
+  '/alerts': '/提醒.png',
+  '/settings': '/安全.png',
+}
+
 const isActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`)
+
+const now = ref(new Date())
+let clockTimer: ReturnType<typeof setInterval> | null = null
+
+const formatDate = (date: Date) => {
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatTime = (date: Date) =>
+  date.toLocaleTimeString('zh-CN', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+const tradingDate = computed(() => formatDate(now.value))
+const tradingTime = computed(() => formatTime(now.value))
+
+onMounted(() => {
+  clockTimer = setInterval(() => {
+    now.value = new Date()
+  }, 60000)
+})
+
+onUnmounted(() => {
+  if (clockTimer) {
+    clearInterval(clockTimer)
+  }
+})
 </script>
 
 <template>
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-mark"></div>
+      <div class="brand-mark">
+        <img class="brand-icon" src="/favicon.ico" alt="App" />
+      </div>
       <div>
         <div class="brand-title">栖木交易</div>
         <div class="brand-subtitle">交易客户端</div>
@@ -50,7 +95,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
           :to="item.path"
           :class="['nav-link', { active: isActive(item.path) }]"
         >
-          <span class="nav-indicator"></span>
+          <img class="nav-icon" :src="iconMap[item.path]" :alt="item.label" />
           {{ item.label }}
         </RouterLink>
       </div>
@@ -58,7 +103,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 
     <div class="nav-footer card">
       <div class="nav-footer-title">交易日</div>
-      <div class="nav-footer-value">2026-05-25</div>
+      <div class="nav-footer-value">{{ tradingDate }}</div>
+      <p class="nav-footer-note">当前时间 {{ tradingTime }}</p>
       <p class="nav-footer-note">交易时段 09:30 - 15:00</p>
       <p class="nav-footer-note">行情：正常</p>
       <p class="nav-footer-note">交易通道：正常</p>
@@ -92,6 +138,15 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
   height: 42px;
   border-radius: 0;
   background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
 }
 
 .brand-title {
@@ -146,12 +201,10 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
   color: var(--color-text-primary);
 }
 
-.nav-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 0;
-  background: var(--accent);
-  opacity: 0.6;
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .nav-footer {

@@ -171,83 +171,120 @@ const handleRebind = async () => {
 
 <template>
   <div class="login">
-    <div class="login-left">
-      <div class="login-brand">
-        <span class="brand-dot"></span>
-        栖木交易
+    <div class="login-overlay"></div>
+    <div class="login-shell">
+      <div class="login-left">
+        <div class="login-brand">
+          <img class="brand-icon" src="/favicon.ico" alt="App" />
+          栖木交易
+        </div>
+        <h1>统一交易工作台</h1>
+        <h2 class="login-headline">资金、持仓与委托实时掌控</h2>
+        <p class="login-copy">
+          通过资金账户与本机证书完成身份校验，进入后可查看资金余额、证券持仓、
+          实时行情与委托进度，并完成买入、卖出、撤单和提醒管理。
+        </p>
+        <div class="login-features">
+          <div class="feature-card">
+            <div class="feature-title">资金与持仓</div>
+            <div class="feature-desc">查看可用资金、冻结资金、证券市值与持仓盈亏。</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-title">行情与提醒</div>
+            <div class="feature-desc">查询最新价、买一卖一、价格区间，并设置价格提醒。</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-title">委托与成交</div>
+            <div class="feature-desc">提交买卖委托，跟踪未成交、部分成交、已成交与撤单状态。</div>
+          </div>
+        </div>
+        <div class="login-status">行情连接正常 · 交易通道正常 · 本机证书校验</div>
       </div>
-      <h1>资金账户登录</h1>
-      <p class="login-copy">
-        本机证书校验后进入交易工作台，实时查看资金、持仓与委托状态。
-      </p>
-      <div class="login-chips">
-        <span class="chip">行情连接正常</span>
-        <span class="chip">交易通道正常</span>
-        <span class="chip">证书校验中</span>
-      </div>
-      <div class="login-footnote">进入后将自动绑定或验证本机证书</div>
-    </div>
 
-    <div class="login-card card">
-      <h2>登录</h2>
-      <p class="card-subtitle">账户卡号 + 交易密码 + 证书状态。</p>
-      <form class="login-form" @submit.prevent="handleLogin">
-        <label class="field">
-          账户卡号
-          <input v-model="account" class="input" placeholder="请输入账户卡号" />
-        </label>
-        <label class="field">
-          交易密码
-          <input v-model="password" class="input" type="password" placeholder="请输入交易密码" />
-        </label>
-        <label class="field">
-          证书状态
-          <input class="input" :value="certStatusText" readonly />
-        </label>
-        <div v-if="certStatusText.includes('未绑定')" class="form-hint">
-          首次登录将为本机绑定安全证书。
-        </div>
-        <div v-else class="form-hint">正在验证本机证书。</div>
-        <div class="login-actions">
-          <button class="btn btn-ghost" type="button">申请权限</button>
-          <button class="btn btn-primary" type="submit" :disabled="loading">
-            {{ loading ? '登录中...' : '进入工作台' }}
-          </button>
-        </div>
-        <div class="rebind-actions">
-          <button class="btn btn-ghost" type="button" @click="showRebind = !showRebind">
-            {{ showRebind ? '取消重新绑定' : '重新绑定证书' }}
-          </button>
-        </div>
-        <div v-if="showRebind" class="rebind-panel">
+      <div class="login-card card">
+        <h2>登录</h2>
+        <p class="card-subtitle">账户卡号 + 交易密码 + 证书状态。</p>
+        <form class="login-form" @submit.prevent="handleLogin">
           <label class="field">
-            手机号
-            <input v-model="phone" class="input" placeholder="请输入开户手机号" />
+            账户卡号
+            <input v-model="account" class="input" placeholder="请输入账户卡号" />
           </label>
           <label class="field">
-            身份证号
-            <input v-model="idNumber" class="input" placeholder="请输入身份证号" />
+            交易密码
+            <input v-model="password" class="input" type="password" placeholder="请输入交易密码" />
           </label>
-          <button class="btn btn-primary" type="button" :disabled="loading" @click="handleRebind">
-            {{ loading ? '处理中...' : '确认重新绑定' }}
-          </button>
-        </div>
-        <p v-if="infoMessage" class="login-info">{{ infoMessage }}</p>
-        <p v-if="errorMessage" class="login-error">{{ errorMessage }}</p>
-      </form>
+          <div class="cert-row">
+            <div class="cert-label">证书状态</div>
+            <div class="cert-value">
+              <span class="status-pill neutral">{{ certStatusText }}</span>
+            </div>
+          </div>
+          <div v-if="certStatusText.includes('未绑定')" class="form-hint">
+            首次登录将为本机绑定安全证书。
+          </div>
+          <div v-else class="form-hint">正在验证本机证书。</div>
+          <div class="login-actions">
+            <button class="btn btn-ghost" type="button">申请权限</button>
+            <button class="btn btn-primary" type="submit" :disabled="loading">
+              {{ loading ? '登录中...' : '进入工作台' }}
+            </button>
+          </div>
+          <div class="rebind-actions">
+            <button class="btn btn-ghost" type="button" @click="showRebind = !showRebind">
+              {{ showRebind ? '取消重新绑定' : '重新绑定证书' }}
+            </button>
+          </div>
+          <div v-if="showRebind" class="rebind-panel">
+            <label class="field">
+              手机号
+              <input v-model="phone" class="input" placeholder="请输入开户手机号" />
+            </label>
+            <label class="field">
+              身份证号
+              <input v-model="idNumber" class="input" placeholder="请输入身份证号" />
+            </label>
+            <button class="btn btn-primary" type="button" :disabled="loading" @click="handleRebind">
+              {{ loading ? '处理中...' : '确认重新绑定' }}
+            </button>
+          </div>
+          <p v-if="infoMessage" class="login-info">{{ infoMessage }}</p>
+          <p v-if="errorMessage" class="login-error">{{ errorMessage }}</p>
+        </form>
+      </div>
     </div>
   </div>
 </template>
-
 <style scoped>
 .login {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
-  padding: 48px 10vw;
+  height: 100svh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 10vw;
+  background: url('/Background.png') center / cover no-repeat;
+  overflow: hidden;
+}
+
+:global(.app-root) {
+  padding-bottom: 0;
+}
+
+.login-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(244, 245, 246, 0.5);
+  /* backdrop-filter: blur(1px); */
+}
+
+.login-shell {
   position: relative;
   z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(280px, 1.1fr) minmax(320px, 0.9fr);
+  gap: 40px;
+  width: min(1100px, 100%);
 }
 
 .login-left {
@@ -265,36 +302,62 @@ const handleRebind = async () => {
   letter-spacing: 0.04em;
 }
 
-.brand-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 0;
-  background: var(--accent);
+.brand-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.login-headline {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .login-copy {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--muted);
-  max-width: 360px;
+  max-width: 520px;
+  line-height: 1.6;
 }
 
-.login-chips {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.login-features {
+  display: grid;
+  gap: 12px;
 }
 
-.login-footnote {
+.feature-card {
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 12px 14px;
+}
+
+.feature-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feature-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.login-status {
   font-size: 12px;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
 }
 
 .login-card {
-  max-width: 420px;
+  max-width: 460px;
   align-self: center;
   padding: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 24px -18px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .login-form {
@@ -340,7 +403,7 @@ const handleRebind = async () => {
 }
 
 h1 {
-  font-size: 40px;
+  font-size: 36px;
   margin: 0;
 }
 
@@ -348,9 +411,35 @@ h2 {
   margin: 0 0 6px;
 }
 
+.cert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+}
+
+.cert-label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cert-value {
+  font-size: 12px;
+}
+
 @media (max-width: 720px) {
   .login {
-    padding: 32px 20px;
+    padding: 24px 16px;
+    height: 100svh;
+  }
+
+  .login-shell {
+    grid-template-columns: 1fr;
   }
 
   h1 {
