@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 type HoldingItem = {
   symbol: string
   name: string
   shares: number
+  availableShares?: number
+  frozenShares?: number
   costPrice: number
   lastPrice: number
   pnlAmount: number
@@ -20,6 +22,10 @@ const now = ref(Date.now())
 
 let clockTimer: ReturnType<typeof setInterval> | null = null
 
+const props = defineProps<{
+  refreshKey?: number
+}>()
+
 const accountId = computed(() => localStorage.getItem('trading-account') || 'admin')
 
 const formatCurrency = (value: number) =>
@@ -30,6 +36,8 @@ const formatCurrency = (value: number) =>
   }).format(value)
 
 const formatRate = (value: number) => `${(value * 100).toFixed(2)}%`
+
+const formatNumber = (value?: number) => (value === undefined ? '--' : value.toString())
 
 const asOfLabel = computed(() => {
   if (!asOf.value) {
@@ -88,6 +96,13 @@ onMounted(() => {
   }, 60000)
 })
 
+watch(
+  () => props.refreshKey,
+  () => {
+    fetchHoldings()
+  },
+)
+
 onUnmounted(() => {
   if (clockTimer) {
     clearInterval(clockTimer)
@@ -105,47 +120,61 @@ onUnmounted(() => {
           <span class="sub-meta">{{ asOfLabel }}</span>
         </div>
       </div>
-      <button class="btn btn-ghost btn-small" type="button" :disabled="loading" @click="fetchHoldings">
-        手动刷新
-      </button>
+      <span class="form-hint">页面刷新资产后更新</span>
     </div>
     <div class="summary" v-if="totalMarketValue">
       总市值：{{ formatCurrency(totalMarketValue) }}
     </div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>代码</th>
-          <th>股数</th>
-          <th>成本</th>
-          <th>最新价</th>
-          <th>盈亏</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="loading">
-          <td colspan="5">加载中...</td>
-        </tr>
-        <tr v-else-if="errorMessage">
-          <td colspan="5">{{ errorMessage }}</td>
-        </tr>
-        <tr v-else-if="holdings.length === 0">
-          <td colspan="5">暂无持仓</td>
-        </tr>
-        <tr v-else v-for="item in holdings" :key="item.symbol">
-          <td>
-            <div class="symbol">{{ item.symbol }}</div>
-            <div class="name">{{ item.name }}</div>
-          </td>
-          <td>{{ item.shares }}</td>
-          <td>{{ formatCurrency(item.costPrice) }}</td>
-          <td>{{ formatCurrency(item.lastPrice) }}</td>
-          <td :class="item.pnlAmount < 0 ? 'tag-negative' : 'tag-positive'">
-            {{ formatCurrency(item.pnlAmount) }} ({{ formatRate(item.pnlRate) }})
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>代码</th>
+            <th class="numeric">持仓</th>
+            <th class="numeric">可卖</th>
+            <th class="numeric">冻结</th>
+            <th class="numeric">成本价</th>
+            <th class="numeric">最新价</th>
+            <th class="numeric">市值</th>
+            <th class="numeric">盈亏</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading">
+            <td colspan="9">加载中...</td>
+          </tr>
+          <tr v-else-if="errorMessage">
+            <td colspan="9">{{ errorMessage }}</td>
+          </tr>
+          <tr v-else-if="holdings.length === 0">
+            <td colspan="9">暂无持仓</td>
+          </tr>
+          <tr v-else v-for="item in holdings" :key="item.symbol">
+            <td>
+              <div class="symbol">{{ item.symbol }}</div>
+              <div class="name">{{ item.name }}</div>
+            </td>
+            <td class="numeric">{{ formatNumber(item.shares) }}</td>
+            <td class="numeric">{{ formatNumber(item.availableShares) }}</td>
+            <td class="numeric">{{ formatNumber(item.frozenShares) }}</td>
+            <td class="numeric">{{ formatCurrency(item.costPrice) }}</td>
+            <td class="numeric">{{ formatCurrency(item.lastPrice) }}</td>
+            <td class="numeric">{{ formatCurrency(item.lastPrice * item.shares) }}</td>
+            <td class="numeric" :class="item.pnlAmount < 0 ? 'tag-negative' : 'tag-positive'">
+              {{ formatCurrency(item.pnlAmount) }} ({{ formatRate(item.pnlRate) }})
+            </td>
+            <td>
+              <div class="inline-actions">
+                <button class="btn btn-small" type="button">买入</button>
+                <button class="btn btn-small" type="button">卖出</button>
+                <button class="btn btn-ghost btn-small" type="button">提醒</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 

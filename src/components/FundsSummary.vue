@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 type FundsData = {
   available: number
@@ -102,12 +102,23 @@ const fetchFunds = async () => {
   }
 }
 
+const props = defineProps<{
+  refreshKey?: number
+}>()
+
 onMounted(() => {
   fetchFunds()
   clockTimer = setInterval(() => {
     now.value = Date.now()
   }, 60000)
 })
+
+watch(
+  () => props.refreshKey,
+  () => {
+    fetchFunds()
+  },
+)
 
 onUnmounted(() => {
   if (clockTimer) {
@@ -126,9 +137,7 @@ onUnmounted(() => {
           <span class="sub-meta">{{ updatedAtLabel }}</span>
         </div>
       </div>
-      <button class="btn btn-ghost btn-small" type="button" :disabled="loading" @click="fetchFunds">
-        手动刷新
-      </button>
+      <span class="form-hint">页面刷新资产后更新</span>
     </div>
     <div class="metrics">
       <div v-if="loading" class="metric">加载中...</div>

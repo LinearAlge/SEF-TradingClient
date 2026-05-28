@@ -1,10 +1,40 @@
 <script setup lang="ts">
-const filters = [
-  { label: '今日', active: true },
-  { label: '本周', active: false },
-  { label: '本月', active: false },
-  { label: '本季', active: false },
-]
+import { ref } from 'vue'
+
+const emit = defineEmits(['search', 'reset', 'filters-change'])
+
+const query = ref('')
+const board = ref('主板')
+const range = ref('今日')
+
+const filters = ['今日', '本周', '本月']
+
+const handleSearch = () => {
+  emit('search', {
+    query: query.value.trim(),
+    board: board.value,
+    range: range.value,
+  })
+}
+
+const handleReset = () => {
+  query.value = ''
+  board.value = '主板'
+  range.value = '今日'
+  emit('reset')
+}
+
+const notifyFilters = () => {
+  emit('filters-change', {
+    range: range.value,
+  })
+}
+
+const handleEnter = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    handleSearch()
+  }
+}
 </script>
 
 <template>
@@ -16,42 +46,35 @@ const filters = [
     <div class="search-grid">
       <label class="field">
         代码或名称
-        <input class="input" placeholder="例如 QST 或 石英" />
+        <input
+          v-model="query"
+          class="input"
+          placeholder="例如 600001 或 石英"
+          @keyup="handleEnter"
+        />
       </label>
       <label class="field">
         交易板块
-        <select class="select">
+        <select v-model="board" class="select">
           <option>主板</option>
           <option>创业板</option>
           <option>ST 板</option>
         </select>
       </label>
-      <label class="field">
-        行情刷新
-        <select class="select">
-          <option>5 秒</option>
-          <option>15 秒</option>
-          <option>30 秒</option>
-        </select>
-      </label>
-      <div class="field">
-        区间
-        <div class="filter-row">
-          <button
-            v-for="item in filters"
-            :key="item.label"
-            class="btn"
-            type="button"
-            :class="item.active ? 'btn-primary' : ''"
-          >
-            {{ item.label }}
-          </button>
-        </div>
+      <div class="search-actions inline-actions">
+        <button class="btn btn-primary" type="button" @click="handleSearch">查询</button>
+        <button class="btn btn-ghost" type="button" @click="handleReset">重置</button>
       </div>
     </div>
-    <div class="search-actions">
-      <button class="btn btn-ghost" type="button">重置</button>
-      <button class="btn btn-primary" type="button">查询</button>
+    <div class="filter-row chips">
+      <span
+        v-for="item in filters"
+        :key="item"
+        :class="['chip', range === item ? 'chip-active' : '']"
+        @click="range = item; notifyFilters()"
+      >
+        {{ item }}
+      </span>
     </div>
   </div>
 </template>
@@ -65,7 +88,7 @@ const filters = [
 .search-grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .filter-row {
@@ -75,9 +98,20 @@ const filters = [
 }
 
 .search-actions {
-  display: flex;
   justify-content: flex-end;
+}
+
+.chips {
   gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.chip {
+  cursor: pointer;
+}
+
+.chip-active {
+  border-color: var(--color-border-dark);
 }
 </style>

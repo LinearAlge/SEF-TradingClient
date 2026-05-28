@@ -5,25 +5,25 @@ const route = useRoute()
 
 const navGroups = [
   {
-    title: '概览',
+    title: '工作台',
     items: [
-      { label: '总览', path: '/dashboard' },
+      { label: '首页', path: '/dashboard' },
       { label: '行情', path: '/market' },
     ],
   },
   {
     title: '交易',
     items: [
-      { label: '下单', path: '/trade' },
-      { label: '委托', path: '/orders' },
+      { label: '交易', path: '/trade' },
+      { label: '委托成交', path: '/orders' },
     ],
   },
   {
-    title: '账户',
+    title: '资产',
     items: [
-      { label: '账户', path: '/account' },
+      { label: '资产', path: '/account' },
       { label: '提醒', path: '/alerts' },
-      { label: '设置', path: '/settings' },
+      { label: '安全', path: '/settings' },
     ],
   },
 ]
@@ -60,6 +60,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
       <div class="nav-footer-title">交易日</div>
       <div class="nav-footer-value">2026-05-25</div>
       <p class="nav-footer-note">交易时段 09:30 - 15:00</p>
+      <p class="nav-footer-note">行情：正常</p>
+      <p class="nav-footer-note">交易通道：正常</p>
     </div>
   </aside>
 </template>

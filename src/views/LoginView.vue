@@ -7,6 +7,7 @@ import {
   loadStoredKeyPair,
   signChallenge,
 } from '../utils/certificateStore'
+import { addLoginRecord } from '../utils/tradingLocalStore'
 
 const router = useRouter()
 const account = ref('')
@@ -77,6 +78,13 @@ const handleLogin = async () => {
       }
 
       localStorage.setItem('trading-account', account.value.trim())
+      addLoginRecord({
+        id: `LOG-${Date.now()}`,
+        time: new Date().toLocaleString('zh-CN', { hour12: false }),
+        method: '证书登录',
+        device: 'Windows 终端',
+        status: '成功',
+      })
       router.push('/dashboard')
       return
     }
@@ -101,11 +109,25 @@ const handleLogin = async () => {
       }
 
       localStorage.setItem('trading-account', account.value.trim())
+      addLoginRecord({
+        id: `LOG-${Date.now()}`,
+        time: new Date().toLocaleString('zh-CN', { hour12: false }),
+        method: '证书登录',
+        device: 'Windows 终端',
+        status: '成功',
+      })
       router.push('/dashboard')
       return
     }
 
     localStorage.setItem('trading-account', account.value.trim())
+    addLoginRecord({
+      id: `LOG-${Date.now()}`,
+      time: new Date().toLocaleString('zh-CN', { hour12: false }),
+      method: '密码登录',
+      device: 'Windows 终端',
+      status: '成功',
+    })
     router.push('/dashboard')
   } catch (error) {
     errorMessage.value = '无法连接测试服务，请确认后端已启动'
@@ -154,21 +176,21 @@ const handleRebind = async () => {
         <span class="brand-dot"></span>
         栖木交易
       </div>
-      <h1>清晰掌控交易。</h1>
+      <h1>资金账户登录</h1>
       <p class="login-copy">
-        在统一的交易客户端中查看资金、持仓与委托。
+        本机证书校验后进入交易工作台，实时查看资金、持仓与委托状态。
       </p>
       <div class="login-chips">
-        <span class="chip">实时行情</span>
-        <span class="chip">限价风控</span>
-        <span class="chip">成交回执</span>
+        <span class="chip">行情连接正常</span>
+        <span class="chip">交易通道正常</span>
+        <span class="chip">证书校验中</span>
       </div>
-      <div class="login-footnote">撮合引擎已就绪</div>
+      <div class="login-footnote">进入后将自动绑定或验证本机证书</div>
     </div>
 
     <div class="login-card card">
       <h2>登录</h2>
-      <p class="card-subtitle">使用资金账户登录。</p>
+      <p class="card-subtitle">账户卡号 + 交易密码 + 证书状态。</p>
       <form class="login-form" @submit.prevent="handleLogin">
         <label class="field">
           账户卡号
@@ -182,6 +204,10 @@ const handleRebind = async () => {
           证书状态
           <input class="input" :value="certStatusText" readonly />
         </label>
+        <div v-if="certStatusText.includes('未绑定')" class="form-hint">
+          首次登录将为本机绑定安全证书。
+        </div>
+        <div v-else class="form-hint">正在验证本机证书。</div>
         <div class="login-actions">
           <button class="btn btn-ghost" type="button">申请权限</button>
           <button class="btn btn-primary" type="submit" :disabled="loading">

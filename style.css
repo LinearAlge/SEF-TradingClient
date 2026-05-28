@@ -17,7 +17,7 @@
 
 /* 2. Global Reset & Typography */
 html, body, #app, .el-container, button, input, select, textarea {
-  font-family: 'Inter', -apple-system, 'BlinkMacSystemFont', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif !important;
+  font-family: 'IBM Plex Sans', -apple-system, 'BlinkMacSystemFont', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-main);
@@ -28,7 +28,7 @@ html, body, #app, .el-container, button, input, select, textarea {
 /* Monospace fonts for data display */
 .monospace-data, 
 :deep(.el-table) {
-  font-family: 'Inter', 'SF Mono', 'JetBrains Mono', 'Courier New', monospace !important;
+  font-family: 'IBM Plex Mono', 'SF Mono', 'JetBrains Mono', 'Courier New', monospace !important;
   letter-spacing: 0px !important;
 }
 
@@ -177,7 +177,7 @@ body .el-table__header-wrapper {
 body .el-table th {
   background-color: var(--color-bg-card) !important;
   color: var(--color-text-muted) !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em !important;

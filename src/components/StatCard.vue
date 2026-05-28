@@ -6,6 +6,8 @@ const props = defineProps<{
   value: string
   change?: string
   note?: string
+  meta?: string[]
+  density?: 'default' | 'compact'
   tone?: 'positive' | 'negative' | 'neutral'
 }>()
 
@@ -17,13 +19,16 @@ const toneClass = computed(() => {
 </script>
 
 <template>
-  <div class="card stat-card">
+  <div :class="['card', 'stat-card', props.density === 'compact' ? 'stat-compact' : '']">
     <div class="stat-header">
       <p class="stat-title">{{ title }}</p>
       <span v-if="change" :class="['stat-change', toneClass]">{{ change }}</span>
     </div>
     <div class="stat-value">{{ value }}</div>
     <p v-if="note" class="stat-note">{{ note }}</p>
+    <div v-if="meta?.length" class="stat-meta">
+      <span v-for="item in meta" :key="item">{{ item }}</span>
+    </div>
   </div>
 </template>
 
@@ -63,5 +68,21 @@ const toneClass = computed(() => {
   margin: 0;
   font-size: 12px;
   color: var(--muted);
+}
+
+.stat-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stat-compact {
+  padding: 14px 16px;
+}
+
+.stat-compact .stat-value {
+  font-size: 22px;
 }
 </style>

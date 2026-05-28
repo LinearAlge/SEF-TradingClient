@@ -4,9 +4,15 @@ const path = require('path')
 
 const PORT = process.env.PORT || 3003
 const DB_PATH = path.join(__dirname, '..', 'data', 'trading-db.json')
+const MARKET_DB_PATH = path.join(__dirname, '..', 'market', 'market-db.json')
 
 const DEFAULT_DB = {
   accounts: {},
+}
+
+const DEFAULT_MARKET = {
+  asOf: '',
+  stocks: [],
 }
 
 const sendJson = (res, statusCode, payload) => {
@@ -20,10 +26,6 @@ const sendJson = (res, statusCode, payload) => {
   res.end(body)
 }
 
-const saveDb = (db) => {
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8')
-}
-
 const formatAsOf = () => {
   const now = new Date()
   const offsetMs = 8 * 60 * 60 * 1000
@@ -31,10 +33,11 @@ const formatAsOf = () => {
   return local.toISOString().replace('Z', '+08:00')
 }
 
-const calculateMarketValue = (positions = []) => {
+const calculateMarketValue = (positions = [], marketIndex = {}) => {
   return positions.reduce((sum, position) => {
     const totalShares = (position.lots || []).reduce((lotSum, lot) => lotSum + lot.shares, 0)
-    return sum + totalShares * position.lastPrice
+    const lastPrice = Number(marketIndex[position.symbol]?.lastPrice ?? position.lastPrice ?? 0)
+    return sum + totalShares * lastPrice
   }, 0)
 }
 
@@ -50,6 +53,28 @@ const loadDb = () => {
   } catch (error) {
     return { ...DEFAULT_DB }
   }
+}
+
+const loadMarketDb = () => {
+  if (!fs.existsSync(MARKET_DB_PATH)) {
+    return { ...DEFAULT_MARKET }
+  }
+
+  try {
+    const raw = fs.readFileSync(MARKET_DB_PATH, 'utf8')
+    const parsed = JSON.parse(raw)
+    return { ...DEFAULT_MARKET, ...parsed }
+  } catch (error) {
+    return { ...DEFAULT_MARKET }
+  }
+}
+
+const buildMarketIndex = (market = {}) => {
+  const index = {}
+  ;(market.stocks || []).forEach((stock) => {
+    index[stock.symbol] = stock
+  })
+  return index
 }
 
 const server = http.createServer((req, res) => {
@@ -82,8 +107,11 @@ const server = http.createServer((req, res) => {
     const balances = record.balances || {}
     const available = Number(balances.available ?? record.available ?? 0)
     const frozen = Number(balances.frozen ?? record.frozen ?? 0)
-    const marketValue = calculateMarketValue(record.positions || [])
+    const marketDb = loadMarketDb()
+    const marketIndex = buildMarketIndex(marketDb)
+    const marketValue = calculateMarketValue(record.positions || [], marketIndex)
     const totalEquity = available + frozen + marketValue
+    const updatedAt = marketDb.asOf || record.asOf || formatAsOf()
 
     sendJson(res, 200, {
       ok: true,
@@ -94,7 +122,7 @@ const server = http.createServer((req, res) => {
       frozen,
       marketValue,
       totalEquity,
-      updatedAt: record.asOf || formatAsOf(),
+      updatedAt,
     })
     return
   }
