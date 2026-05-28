@@ -123,14 +123,20 @@ onMounted(() => {
     </section>
 
     <section class="grid grid-2">
-      <div class="card">
+      <div class="card cert-card">
         <div class="card-title">安全证书</div>
         <div class="card-subtitle">本机证书与验证状态</div>
-        <div class="meta-row">
-          <div>证书状态：{{ certStatus }}</div>
-          <div>最近验证：今日 09:30</div>
+        <div class="cert-body">
+          <div class="cert-item">
+            <span>证书状态</span>
+            <strong>{{ certStatus }}</strong>
+          </div>
+          <div class="cert-item">
+            <span>最近验证</span>
+            <strong>今日 09:30</strong>
+          </div>
         </div>
-        <div class="inline-actions">
+        <div class="inline-actions cert-actions">
           <button class="btn btn-ghost btn-small" type="button">重新绑定</button>
           <button class="btn btn-primary btn-small" type="button" @click="handleCertVerify">验证证书</button>
         </div>
@@ -138,27 +144,29 @@ onMounted(() => {
       <div class="card">
         <div class="card-title">登录记录</div>
         <div class="card-subtitle">最近 7 日访问</div>
-        <div class="inline-actions" style="margin-bottom: 12px;">
+        <div class="inline-actions record-actions">
           <button class="btn btn-ghost btn-small" type="button" @click="refreshLoginRecords">刷新记录</button>
         </div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>时间</th>
-              <th>方式</th>
-              <th>设备</th>
-              <th>状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="record in loginRecords" :key="record.id">
-              <td>{{ record.time }}</td>
-              <td>{{ record.method }}</td>
-              <td>{{ record.device }}</td>
-              <td><span class="status-pill positive">{{ record.status }}</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="record-scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>方式</th>
+                <th>设备</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="record in loginRecords" :key="record.id">
+                <td>{{ record.time }}</td>
+                <td>{{ record.method }}</td>
+                <td>{{ record.device }}</td>
+                <td><span class="status-pill positive">{{ record.status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </AppShell>
@@ -172,5 +180,41 @@ onMounted(() => {
 
 .record-actions {
   margin-bottom: 12px;
+}
+
+.record-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.cert-card {
+  display: grid;
+  gap: 10px;
+}
+
+.cert-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cert-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cert-item strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.cert-actions {
+  margin-top: 2px;
 }
 </style>
