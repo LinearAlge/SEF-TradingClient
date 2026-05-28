@@ -76,6 +76,7 @@ const handleLogin = async () => {
         return
       }
 
+      localStorage.setItem('trading-account', account.value.trim())
       router.push('/dashboard')
       return
     }
@@ -99,10 +100,12 @@ const handleLogin = async () => {
         return
       }
 
+      localStorage.setItem('trading-account', account.value.trim())
       router.push('/dashboard')
       return
     }
 
+    localStorage.setItem('trading-account', account.value.trim())
     router.push('/dashboard')
   } catch (error) {
     errorMessage.value = '无法连接测试服务，请确认后端已启动'

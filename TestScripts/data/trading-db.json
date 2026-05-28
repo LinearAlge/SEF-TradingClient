@@ -1,0 +1,53 @@
+{
+  "accounts": {
+    "admin": {
+      "fundAccountId": "CASH-20001",
+      "securitiesAccountId": "SEC-10001",
+      "currency": "CNY",
+      "balances": {
+        "available": 128420,
+        "frozen": 18600
+      },
+      "asOf": "2026-05-28T12:10:57.654+08:00",
+      "positions": [
+        {
+          "symbol": "600001",
+          "name": "石英系统",
+          "lastPrice": 113.89,
+          "lots": [
+            {
+              "price": 104.32,
+              "shares": 400
+            },
+            {
+              "price": 105.1,
+              "shares": 460
+            }
+          ]
+        },
+        {
+          "symbol": "600002",
+          "name": "新星出行",
+          "lastPrice": 86.36,
+          "lots": [
+            {
+              "price": 88.1,
+              "shares": 420
+            }
+          ]
+        },
+        {
+          "symbol": "600003",
+          "name": "流明食品",
+          "lastPrice": 25.46,
+          "lots": [
+            {
+              "price": 23.8,
+              "shares": 1200
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
