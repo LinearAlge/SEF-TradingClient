@@ -2,8 +2,8 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const PORT = process.env.PORT || 3004
-const DB_PATH = path.join(__dirname, 'market-db.json')
+const PORT = process.env.PORT || 3024
+const DB_PATH = path.join(__dirname, 'data', 'mock-market-db.json')
 
 const DEFAULT_DB = {
   asOf: '',
@@ -150,7 +150,7 @@ const server = http.createServer((req, res) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`Market mock server running at http://localhost:${PORT}`)
+  console.log(`Mock market service running at http://localhost:${PORT}`)
 })
 
 updateMarketSnapshot()

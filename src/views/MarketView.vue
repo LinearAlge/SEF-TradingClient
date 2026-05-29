@@ -6,6 +6,7 @@ import StockSearchPanel from '../components/StockSearchPanel.vue'
 import MarketTable from '../components/MarketTable.vue'
 import StockDetailCard from '../components/StockDetailCard.vue'
 import PriceTicker from '../components/PriceTicker.vue'
+import { fetchStock, fetchStocks as fetchMarketStocks } from '../services/clientApi'
 
 type StockRow = {
   symbol: string
@@ -74,13 +75,8 @@ const fetchStocks = async (query = '', board = '') => {
   loading.value = true
   errorMessage.value = ''
   try {
-    const params = new URLSearchParams()
-    if (query) params.set('query', query)
-    if (board) params.set('board', board)
-
-    const response = await fetch(`http://localhost:3004/stocks?${params.toString()}`)
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok || !data.ok) {
+    const data = await fetchMarketStocks({ query, board })
+    if (!data.ok) {
       errorMessage.value = data.message || '行情加载失败'
       stocks.value = []
       selected.value = null
@@ -90,7 +86,7 @@ const fetchStocks = async (query = '', board = '') => {
     stocks.value = data.stocks || []
     asOf.value = data.asOf || ''
     now.value = Date.now()
-    if (stocks.value.length > 0) {
+    if (stocks.value.length > 0 && stocks.value[0]) {
       await fetchStockDetail(stocks.value[0].symbol)
     } else {
       selected.value = null
@@ -109,11 +105,8 @@ const fetchStockDetail = async (symbol: string) => {
   detailError.value = ''
   selectedSymbol.value = symbol
   try {
-    const response = await fetch(
-      `http://localhost:3004/stocks?symbol=${encodeURIComponent(symbol)}`,
-    )
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok || !data.ok) {
+    const data = await fetchStock(symbol)
+    if (!data.ok) {
       detailError.value = data.message || '股票详情加载失败'
       selected.value = null
       return
@@ -134,6 +127,10 @@ const handleSearch = (payload: { query: string; board: string }) => {
 
 const handleReset = () => {
   fetchStocks('', '主板')
+}
+
+const handleRefresh = () => {
+  fetchStocks(currentQuery.value, currentBoard.value)
 }
 
 
@@ -221,7 +218,7 @@ onUnmounted(() => {
     :showRefresh="true"
     refreshLabel="刷新行情"
     :lastUpdated="lastUpdatedLabel"
-    :onRefresh="() => fetchStocks(currentQuery.value, currentBoard.value)"
+    :onRefresh="handleRefresh"
   >
     <template #actions>
       <button class="btn btn-ghost" type="button" @click="toggleAutoRefresh">

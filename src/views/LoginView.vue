@@ -8,6 +8,7 @@ import {
   signChallenge,
 } from '../utils/certificateStore'
 import { useTradingStore } from '../composables/useTradingStore'
+import { applyClientAccess, authEnroll, authLogin, authRebind, authVerify } from '../services/clientApi'
 
 const router = useRouter()
 const store = useTradingStore()
@@ -20,6 +21,9 @@ const errorMessage = ref('')
 const infoMessage = ref('')
 const certStatus = ref('')
 const showRebind = ref(false)
+const showApply = ref(false)
+const applyMessage = ref('')
+const applyError = ref('')
 
 const certStatusText = computed(() => certStatus.value || '未检测到证书')
 
@@ -32,22 +36,13 @@ onMounted(() => {
   updateCertStatus()
 })
 
-const requestJson = async (path: string, payload: Record<string, unknown>) => {
-  const response = await fetch(`http://localhost:3001${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  const data = await response.json().catch(() => ({}))
-  return { response, data }
-}
-
 const handleLogin = async () => {
   errorMessage.value = ''
   infoMessage.value = ''
+  applyMessage.value = ''
+  applyError.value = ''
+  showApply.value = false
+  showRebind.value = false
   if (!account.value.trim() || !password.value) {
     errorMessage.value = '请输入账户卡号和交易密码'
     return
@@ -55,26 +50,26 @@ const handleLogin = async () => {
 
   loading.value = true
   try {
-    const { response, data } = await requestJson('/login', {
+    const data = await authLogin({
       account: account.value.trim(),
       password: password.value,
     })
-
-    if (!response.ok || !data.ok) {
+    if (!data.ok) {
       errorMessage.value = data.message || '登录失败，请检查账号或密码'
+      showApply.value = data.action === 'apply'
       return
     }
 
     if (data.action === 'enroll') {
       const { publicJwk } = await ensureStoredKeyPair()
       await updateCertStatus()
-      const enrollResult = await requestJson('/enroll', {
-        account: account.value.trim(),
-        publicKey: publicJwk,
-      })
-
-      if (!enrollResult.response.ok || !enrollResult.data.ok) {
-        errorMessage.value = enrollResult.data.message || '证书绑定失败'
+      try {
+        await authEnroll({
+          account: account.value.trim(),
+          publicKey: publicJwk,
+        })
+      } catch (error) {
+        errorMessage.value = error instanceof Error ? error.message : '证书绑定失败'
         return
       }
 
@@ -94,13 +89,13 @@ const handleLogin = async () => {
       }
 
       const signature = await signChallenge(stored.privateKey, data.challenge)
-      const verifyResult = await requestJson('/verify', {
-        account: account.value.trim(),
-        signature,
-      })
-
-      if (!verifyResult.response.ok || !verifyResult.data.ok) {
-        errorMessage.value = verifyResult.data.message || '证书验证失败'
+      try {
+        await authVerify({
+          account: account.value.trim(),
+          signature,
+        })
+      } catch (error) {
+        errorMessage.value = error instanceof Error ? error.message : '证书验证失败'
         return
       }
 
@@ -122,6 +117,27 @@ const handleLogin = async () => {
   }
 }
 
+const handleApply = async () => {
+  applyMessage.value = ''
+  applyError.value = ''
+  if (!account.value.trim() || !password.value || !phone.value.trim()) {
+    applyError.value = '申请前请填写账户、密码与手机号'
+    return
+  }
+  try {
+    await applyClientAccess({
+      account: account.value.trim(),
+      password: password.value,
+      name: account.value.trim(),
+      phone: phone.value.trim(),
+      idNumber: idNumber.value.trim(),
+    })
+    applyMessage.value = '申请已通过，请重新登录'
+  } catch (error) {
+    applyError.value = error instanceof Error ? error.message : '申请失败'
+  }
+}
+
 const handleRebind = async () => {
   errorMessage.value = ''
   infoMessage.value = ''
@@ -132,15 +148,15 @@ const handleRebind = async () => {
 
   loading.value = true
   try {
-    const { response, data } = await requestJson('/rebind', {
-      account: account.value.trim(),
-      password: password.value,
-      phone: phone.value.trim(),
-      idNumber: idNumber.value.trim(),
-    })
-
-    if (!response.ok || !data.ok) {
-      errorMessage.value = data.message || '重新绑定失败'
+    try {
+      await authRebind({
+        account: account.value.trim(),
+        password: password.value,
+        phone: phone.value.trim(),
+        idNumber: idNumber.value.trim(),
+      })
+    } catch (error) {
+      errorMessage.value = error instanceof Error ? error.message : '重新绑定失败'
       return
     }
 
@@ -210,10 +226,25 @@ const handleRebind = async () => {
           </div>
           <div v-else class="form-hint">正在验证本机证书。</div>
           <div class="login-actions">
-            <button class="btn btn-ghost" type="button">申请权限</button>
+            <button class="btn btn-ghost" type="button" @click="showApply = !showApply">申请权限</button>
             <button class="btn btn-primary" type="submit" :disabled="loading">
               {{ loading ? '登录中...' : '进入工作台' }}
             </button>
+          </div>
+          <div v-if="showApply" class="rebind-panel">
+            <label class="field">
+              手机号
+              <input v-model="phone" class="input" placeholder="请输入手机号" />
+            </label>
+            <label class="field">
+              身份证号
+              <input v-model="idNumber" class="input" placeholder="可选" />
+            </label>
+            <button class="btn btn-primary" type="button" :disabled="loading" @click="handleApply">
+              提交申请
+            </button>
+            <p v-if="applyMessage" class="login-info">{{ applyMessage }}</p>
+            <p v-if="applyError" class="login-error">{{ applyError }}</p>
           </div>
           <div class="rebind-actions">
             <button class="btn btn-ghost" type="button" @click="showRebind = !showRebind">

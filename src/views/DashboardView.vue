@@ -7,6 +7,7 @@ import HoldingsTable from '../components/HoldingsTable.vue'
 import OrderListTable from '../components/OrderListTable.vue'
 import PriceTicker from '../components/PriceTicker.vue'
 import { useTradingStore } from '../composables/useTradingStore'
+import { fetchStocks } from '../services/clientApi'
 
 const store = useTradingStore()
 const router = useRouter()
@@ -79,9 +80,8 @@ const formatNumber = (value?: number) => {
 
 const fetchTicker = async () => {
   try {
-    const response = await fetch('http://localhost:3004/stocks?board=主板')
-    const payload = await response.json().catch(() => ({}))
-    if (!response.ok || !payload.ok) {
+    const payload = await fetchStocks({ board: '主板' })
+    if (!payload.ok) {
       tickerItems.value = []
       return
     }

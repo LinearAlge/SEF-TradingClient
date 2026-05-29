@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import PriceTicker from '../components/PriceTicker.vue'
 import { useTradingStore } from '../composables/useTradingStore'
+import { fetchStock, fetchStocks } from '../services/clientApi'
 
 const store = useTradingStore()
 const alerts = computed(() => store.state.alerts)
@@ -29,6 +30,7 @@ const handleCreate = async () => {
       condition: newCondition.value,
       triggerPrice: newPrice.value.trim(),
     })
+    await refreshPrices()
     newSymbol.value = ''
     newPrice.value = ''
     showCreate.value = false
@@ -66,11 +68,8 @@ const refreshPrices = async () => {
   await Promise.all(
     items.map(async (item) => {
       try {
-        const response = await fetch(
-          `http://localhost:3004/stocks?symbol=${encodeURIComponent(item.symbol)}`,
-        )
-        const payload = await response.json().catch(() => ({}))
-        if (response.ok && payload.ok) {
+        const payload = await fetchStock(item.symbol)
+        if (payload.ok) {
           item.currentPrice = Number(payload.stock?.lastPrice || 0).toFixed(2)
           const current = Number(item.currentPrice)
           const trigger = Number(item.triggerPrice)
@@ -96,9 +95,8 @@ const refreshPrices = async () => {
 
 const refreshTicker = async () => {
   try {
-    const response = await fetch('http://localhost:3004/stocks?board=主板')
-    const payload = await response.json().catch(() => ({}))
-    if (!response.ok || !payload.ok) {
+    const payload = await fetchStocks({ board: '主板' })
+    if (!payload.ok) {
       tickerItems.value = []
       return
     }

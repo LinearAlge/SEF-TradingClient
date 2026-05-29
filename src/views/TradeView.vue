@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import OrderListTable from '../components/OrderListTable.vue'
 import { useTradingStore } from '../composables/useTradingStore'
+import { fetchStock } from '../services/clientApi'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,11 +49,8 @@ const fetchStockSnapshot = async () => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:3004/stocks?symbol=${encodeURIComponent(symbol.value.trim())}`,
-    )
-    const payload = await response.json().catch(() => ({}))
-    if (!response.ok || !payload.ok) {
+    const payload = await fetchStock(symbol.value.trim())
+    if (!payload.ok) {
       stockName.value = ''
       stockStatus.value = '未知'
       return
@@ -130,6 +128,21 @@ const handlePreview = () => {
   preview.value = validate()
 }
 
+const resetValidationState = () => {
+  if (errors.value.length) {
+    errors.value = []
+  }
+  if (submitError.value) {
+    submitError.value = ''
+  }
+  if (submitMessage.value) {
+    submitMessage.value = ''
+  }
+  if (preview.value) {
+    preview.value = false
+  }
+}
+
 const handleSubmit = async () => {
   if (!validate()) {
     preview.value = false
@@ -172,6 +185,10 @@ onMounted(async () => {
 watch(symbol, async () => {
   await fetchStockSnapshot()
   refreshLimits()
+})
+
+watch([symbol, price, quantity, side], () => {
+  resetValidationState()
 })
 
 watch([price, () => store.state.funds], () => {
