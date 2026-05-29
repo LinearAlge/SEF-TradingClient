@@ -1,0 +1,168 @@
+{
+  "asOf": "2026-05-30T04:19:47.321+08:00",
+  "stocks": [
+    {
+      "symbol": "600001",
+      "name": "石英系统",
+      "board": "主板",
+      "lastPrice": 149.17,
+      "bid": 149.02,
+      "ask": 149.32,
+      "volume": 18541252,
+      "dayHigh": 168.4,
+      "dayLow": 115.8,
+      "weekHigh": 168.4,
+      "weekLow": 112.4,
+      "monthHigh": 168.4,
+      "monthLow": 108.6,
+      "announcements": [
+        "发布2026年一季度业绩快报",
+        "董事会通过回购计划"
+      ]
+    },
+    {
+      "symbol": "600002",
+      "name": "新星出行",
+      "board": "主板",
+      "lastPrice": 93.73,
+      "bid": 93.64,
+      "ask": 93.82,
+      "volume": 18281742,
+      "dayHigh": 101.6,
+      "dayLow": 72.67,
+      "weekHigh": 101.6,
+      "weekLow": 72.67,
+      "monthHigh": 101.6,
+      "monthLow": 72.67,
+      "announcements": [
+        "签署大型车辆采购协议"
+      ]
+    },
+    {
+      "symbol": "600003",
+      "name": "流明食品",
+      "board": "主板",
+      "lastPrice": 30.98,
+      "bid": 30.95,
+      "ask": 31.01,
+      "volume": 19532460,
+      "dayHigh": 31.3,
+      "dayLow": 21.62,
+      "weekHigh": 31.3,
+      "weekLow": 21.62,
+      "monthHigh": 31.3,
+      "monthLow": 21.6,
+      "announcements": [
+        "推出新品类冷链产品"
+      ]
+    },
+    {
+      "symbol": "300001",
+      "name": "星河智能",
+      "board": "创业板",
+      "lastPrice": 45.32,
+      "bid": 45.27,
+      "ask": 45.37,
+      "volume": 18954202,
+      "dayHigh": 47.63,
+      "dayLow": 41.2,
+      "weekHigh": 47.63,
+      "weekLow": 39.7,
+      "monthHigh": 48.9,
+      "monthLow": 38.4,
+      "announcements": [
+        "完成新一代机器人控制器验证"
+      ]
+    },
+    {
+      "symbol": "600004",
+      "name": "ST 北岸",
+      "board": "ST 板",
+      "lastPrice": 3.9,
+      "bid": 3.9,
+      "ask": 3.9,
+      "volume": 17811563,
+      "dayHigh": 6.35,
+      "dayLow": 3.81,
+      "weekHigh": 6.58,
+      "weekLow": 3.81,
+      "monthHigh": 7.02,
+      "monthLow": 3.81,
+      "announcements": [
+        "披露债务重组进展"
+      ]
+    },
+    {
+      "symbol": "600005",
+      "name": "远航制造",
+      "board": "主板",
+      "lastPrice": 54.79,
+      "bid": 54.74,
+      "ask": 54.84,
+      "volume": 15876700,
+      "dayHigh": 58.2,
+      "dayLow": 50.85,
+      "weekHigh": 59.1,
+      "weekLow": 50.6,
+      "monthHigh": 61.8,
+      "monthLow": 49.7,
+      "announcements": [
+        "披露智能产线升级计划"
+      ]
+    },
+    {
+      "symbol": "600006",
+      "name": "宏泰能源",
+      "board": "主板",
+      "lastPrice": 29.63,
+      "bid": 29.6,
+      "ask": 29.66,
+      "volume": 15229764,
+      "dayHigh": 35.95,
+      "dayLow": 28.55,
+      "weekHigh": 35.95,
+      "weekLow": 28.55,
+      "monthHigh": 35.95,
+      "monthLow": 28.5,
+      "announcements": [
+        "签署新能源园区合作协议"
+      ]
+    },
+    {
+      "symbol": "300002",
+      "name": "云端智控",
+      "board": "创业板",
+      "lastPrice": 66.49,
+      "bid": 66.42,
+      "ask": 66.56,
+      "volume": 16689983,
+      "dayHigh": 81.4,
+      "dayLow": 61.25,
+      "weekHigh": 82.3,
+      "weekLow": 61.25,
+      "monthHigh": 84.9,
+      "monthLow": 61.25,
+      "announcements": [
+        "发布工业AI新产品"
+      ]
+    },
+    {
+      "symbol": "300003",
+      "name": "蓝海医疗",
+      "board": "创业板",
+      "lastPrice": 35.14,
+      "bid": 35.1,
+      "ask": 35.18,
+      "volume": 13979211,
+      "dayHigh": 43.5,
+      "dayLow": 33.87,
+      "weekHigh": 44.1,
+      "weekLow": 33.87,
+      "monthHigh": 46.7,
+      "monthLow": 33.87,
+      "announcements": [
+        "完成医疗设备注册"
+      ]
+    }
+  ]
+}

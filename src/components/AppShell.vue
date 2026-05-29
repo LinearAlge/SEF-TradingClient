@@ -5,6 +5,15 @@ import TopBar from './TopBar.vue'
 defineProps<{
   title: string
   subtitle?: string
+  showSearch?: boolean
+  searchPlaceholder?: string
+  showRefresh?: boolean
+  refreshLabel?: string
+  refreshing?: boolean
+  lastUpdated?: string
+  statusItems?: { label: string; value: string }[]
+  onRefresh?: () => void
+  onSearch?: (value: string) => void
 }>()
 </script>
 
@@ -12,7 +21,19 @@ defineProps<{
   <div class="shell">
     <SidebarNav />
     <div class="shell-main">
-      <TopBar :title="title" :subtitle="subtitle">
+      <TopBar
+        :title="title"
+        :subtitle="subtitle"
+        :showSearch="showSearch"
+        :searchPlaceholder="searchPlaceholder"
+        :showRefresh="showRefresh"
+        :refreshLabel="refreshLabel"
+        :refreshing="refreshing"
+        :lastUpdated="lastUpdated"
+        :statusItems="statusItems"
+        :onRefresh="onRefresh"
+        :onSearch="onSearch"
+      >
         <template #actions>
           <slot name="actions" />
         </template>
