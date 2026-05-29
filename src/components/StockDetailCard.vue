@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
 type StockDetail = {
   symbol: string
   name: string
@@ -16,12 +18,24 @@ type StockDetail = {
   announcements: string[]
 }
 
-defineProps<{
+const props = defineProps<{
   stock: StockDetail | null
   loading?: boolean
   error?: string
   asOfLabel?: string
 }>()
+
+const router = useRouter()
+
+const goTrade = (side: 'buy' | 'sell') => {
+  if (!props.stock) return
+  router.push({ path: '/trade', query: { symbol: props.stock.symbol, side } })
+}
+
+const goAlert = () => {
+  if (!props.stock) return
+  router.push({ path: '/alerts', query: { symbol: props.stock.symbol } })
+}
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat('zh-CN', {
@@ -104,9 +118,9 @@ const calcLimit = (value?: number, ratio = 1.1) => {
       <div class="detail-item">
         <div class="detail-label">快捷操作</div>
         <div class="inline-actions">
-          <button class="btn btn-small" type="button">买入</button>
-          <button class="btn btn-small" type="button">卖出</button>
-          <button class="btn btn-ghost btn-small" type="button">设置提醒</button>
+          <button class="btn btn-small" type="button" @click="goTrade('buy')">买入</button>
+          <button class="btn btn-small" type="button" @click="goTrade('sell')">卖出</button>
+          <button class="btn btn-ghost btn-small" type="button" @click="goAlert">设置提醒</button>
         </div>
       </div>
       <div class="detail-item">

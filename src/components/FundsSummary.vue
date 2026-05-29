@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useTradingStore } from '../composables/useTradingStore'
 
-type FundsData = {
-  available: number
-  frozen: number
-  marketValue: number
-  totalEquity: number
-  updatedAt?: string
-}
-
-const data = ref<FundsData | null>(null)
-const loading = ref(false)
-const errorMessage = ref('')
+const store = useTradingStore()
+const data = computed(() => store.state.funds)
+const loading = computed(() => store.state.loading.funds)
+const errorMessage = computed(() => store.state.error)
 const now = ref(Date.now())
 
 let clockTimer: ReturnType<typeof setInterval> | null = null
 
-const accountId = computed(() => localStorage.getItem('trading-account') || 'admin')
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('zh-CN', {
@@ -78,36 +71,14 @@ const updatedAtLabel = computed(() => {
   return `更新于 ${timeText}（${relative}）`
 })
 
-const fetchFunds = async () => {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const response = await fetch(
-      `http://localhost:3003/funds?account=${encodeURIComponent(accountId.value)}`,
-    )
-    const payload = await response.json().catch(() => ({}))
-    if (!response.ok || !payload.ok) {
-      errorMessage.value = payload.message || '资金数据加载失败'
-      data.value = null
-      return
-    }
-
-    data.value = payload
-  } catch (error) {
-    errorMessage.value = '无法连接资金服务'
-    data.value = null
-  } finally {
-    loading.value = false
-    now.value = Date.now()
-  }
-}
-
 const props = defineProps<{
   refreshKey?: number
 }>()
 
 onMounted(() => {
-  fetchFunds()
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  store.refreshFunds()
   clockTimer = setInterval(() => {
     now.value = Date.now()
   }, 60000)
@@ -116,7 +87,7 @@ onMounted(() => {
 watch(
   () => props.refreshKey,
   () => {
-    fetchFunds()
+    store.refreshFunds()
   },
 )
 

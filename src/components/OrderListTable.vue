@@ -16,19 +16,24 @@ const props = withDefaults(
   defineProps<{
     title?: string
     subtitle?: string
-    items?: OrderItem[]
+    items?: ReadonlyArray<OrderItem>
     compact?: boolean
+    selectable?: boolean
+    selectedIds?: string[]
   }>(),
   {
     title: '委托',
     subtitle: '跨市场最新动态',
     items: () => [],
     compact: false,
+    selectable: false,
+    selectedIds: () => [],
   },
 )
 
 const emit = defineEmits<{
   (event: 'cancel', order: OrderItem): void
+  (event: 'toggle', order: OrderItem): void
 }>()
 
 const statusTone = (status: OrderItem['status']) => {
@@ -77,7 +82,13 @@ const formatQuantity = (value?: number) => (value === undefined ? '--' : value.t
           <tr v-if="props.items.length === 0">
             <td :colspan="compact ? 8 : 11">暂无委托记录</td>
           </tr>
-          <tr v-else v-for="order in props.items" :key="order.id">
+          <tr
+            v-else
+            v-for="order in props.items"
+            :key="order.id"
+            :class="{ 'is-selected': props.selectedIds.includes(order.id) }"
+            @click="props.selectable ? emit('toggle', order) : undefined"
+          >
             <td>{{ order.id }}</td>
             <td>{{ order.createdAt }}</td>
             <td>
@@ -99,7 +110,7 @@ const formatQuantity = (value?: number) => (value === undefined ? '--' : value.t
                   v-if="canCancel(order.status)"
                   class="btn btn-danger btn-small"
                   type="button"
-                  @click="emit('cancel', order)"
+                  @click.stop="emit('cancel', order)"
                 >
                   撤单
                 </button>

@@ -20,7 +20,7 @@ const navGroups = [
     ],
   },
   {
-    title: '资产',
+    title: '账户',
     items: [
       { label: '资产', path: '/account' },
       { label: '提醒', path: '/alerts' },
@@ -81,7 +81,7 @@ onUnmounted(() => {
         <img class="brand-icon" src="/favicon.ico" alt="App" />
       </div>
       <div>
-        <div class="brand-title">栖木交易</div>
+        <div class="brand-title">新宇交易</div>
         <div class="brand-subtitle">交易客户端</div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AppShell from '../components/AppShell.vue'
-import { addLoginRecord, loadLoginRecords } from '../utils/tradingLocalStore'
 import { loadStoredKeyPair, signChallenge } from '../utils/certificateStore'
+import { useTradingStore } from '../composables/useTradingStore'
 
 const tradePassword = ref('')
 const tradePasswordNext = ref('')
@@ -14,7 +14,8 @@ const cashPasswordNext = ref('')
 const cashPasswordConfirm = ref('')
 const cashMessage = ref('')
 
-const loginRecords = ref<{ id: string; time: string; method: string; device: string; status: string }[]>([])
+const store = useTradingStore()
+const loginRecords = computed(() => store.state.loginRecords)
 const certStatus = ref('本机已绑定')
 
 const validatePassword = (current: string, next: string, confirm: string) => {
@@ -25,27 +26,36 @@ const validatePassword = (current: string, next: string, confirm: string) => {
   return ''
 }
 
-const handleTradeSave = () => {
+const handleTradeSave = async () => {
   tradeMessage.value = validatePassword(tradePassword.value, tradePasswordNext.value, tradePasswordConfirm.value)
-  if (!tradeMessage.value) tradeMessage.value = '交易密码已更新'
-}
-
-const handleCashSave = () => {
-  cashMessage.value = validatePassword(cashPassword.value, cashPasswordNext.value, cashPasswordConfirm.value)
-  if (!cashMessage.value) cashMessage.value = '取款密码已更新'
-}
-
-const refreshLoginRecords = () => {
-  loginRecords.value = loadLoginRecords()
-  if (loginRecords.value.length === 0) {
-    loginRecords.value = addLoginRecord({
-      id: `LOG-${Date.now()}`,
-      time: '2026-05-29 09:12',
-      method: '证书登录',
-      device: 'Windows 终端',
-      status: '成功',
+  if (tradeMessage.value) return
+  try {
+    await store.changeTradePassword({
+      currentPassword: tradePassword.value,
+      nextPassword: tradePasswordNext.value,
     })
+    tradeMessage.value = '交易密码已更新'
+  } catch (error) {
+    tradeMessage.value = error instanceof Error ? error.message : '交易密码更新失败'
   }
+}
+
+const handleCashSave = async () => {
+  cashMessage.value = validatePassword(cashPassword.value, cashPasswordNext.value, cashPasswordConfirm.value)
+  if (cashMessage.value) return
+  try {
+    await store.changeWithdrawPassword({
+      currentPassword: cashPassword.value,
+      nextPassword: cashPasswordNext.value,
+    })
+    cashMessage.value = '取款密码已更新'
+  } catch (error) {
+    cashMessage.value = error instanceof Error ? error.message : '取款密码更新失败'
+  }
+}
+
+const refreshLoginRecords = async () => {
+  await store.refreshLoginRecords()
 }
 
 const refreshCertStatus = async () => {
@@ -64,6 +74,8 @@ const handleCertVerify = async () => {
 }
 
 onMounted(() => {
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
   refreshLoginRecords()
   refreshCertStatus()
 })

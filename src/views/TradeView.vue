@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import OrderListTable from '../components/OrderListTable.vue'
-import { addOrder, loadOrders } from '../utils/tradingLocalStore'
-
-type OrderItem = {
-  id: string
-  createdAt: string
-  symbol: string
-  name?: string
-  side: '买入' | '卖出'
-  price: number
-  quantity: number
-  filledQuantity: number
-  avgPrice?: number
-  status: '未成交' | '部分成交' | '已成交' | '已撤单' | '已过期' | '已拒绝'
-}
+import { useTradingStore } from '../composables/useTradingStore'
 
 const route = useRoute()
+const router = useRouter()
+const store = useTradingStore()
+
 const side = ref<'buy' | 'sell'>((route.query.side as 'buy' | 'sell') || 'buy')
 const symbol = ref((route.query.symbol as string) || '')
 const price = ref('')
@@ -27,29 +17,33 @@ const note = ref('')
 const preview = ref(false)
 const errors = ref<string[]>([])
 const submitMessage = ref('')
+const submitError = ref('')
+const loading = ref(false)
 
-const availableFunds = ref(128420)
-const availableShares = ref(1200)
-const lastPrice = ref(118.53)
 const stockName = ref('')
 const stockStatus = ref('未知')
+const lastPrice = ref(0)
+const bidPrice = ref(0)
+const askPrice = ref(0)
+const maxBuyQuantity = ref(0)
+const availableShares = ref(0)
 
-const limitUp = computed(() => Number((lastPrice.value * 1.1).toFixed(2)))
-const limitDown = computed(() => Number((lastPrice.value * 0.9).toFixed(2)))
+const accountId = computed(() => store.state.accountId)
+const availableFunds = computed(() => store.availableFunds.value)
 
-const maxBuyQuantity = computed(() => {
-  const priceValue = Number(price.value)
-  if (!priceValue) return 0
-  return Math.floor(availableFunds.value / priceValue / 100) * 100
-})
+const limitUp = computed(() => (lastPrice.value ? Number((lastPrice.value * 1.1).toFixed(2)) : 0))
+const limitDown = computed(() => (lastPrice.value ? Number((lastPrice.value * 0.9).toFixed(2)) : 0))
+const canSubmit = computed(() => errors.value.length === 0 && !loading.value)
 
-const canSubmit = computed(() => errors.value.length === 0)
-
-const orders = ref<OrderItem[]>([])
+const orders = computed(() => store.state.orders)
 
 const fetchStockSnapshot = async () => {
   if (!symbol.value.trim()) {
     stockName.value = ''
+    stockStatus.value = '未知'
+    lastPrice.value = 0
+    bidPrice.value = 0
+    askPrice.value = 0
     return
   }
 
@@ -64,11 +58,38 @@ const fetchStockSnapshot = async () => {
       return
     }
 
-    stockName.value = payload.stock?.name || ''
-    lastPrice.value = Number(payload.stock?.lastPrice || lastPrice.value)
+    const stock = payload.stock || {}
+    stockName.value = stock.name || ''
+    lastPrice.value = Number(stock.lastPrice || 0)
+    bidPrice.value = Number(stock.bid || 0)
+    askPrice.value = Number(stock.ask || 0)
     stockStatus.value = '正常'
+
+    if (!price.value) {
+      if (side.value === 'buy') {
+        price.value = (askPrice.value || lastPrice.value || 0).toFixed(2)
+      } else {
+        price.value = (bidPrice.value || lastPrice.value || 0).toFixed(2)
+      }
+    }
   } catch (error) {
     stockStatus.value = '未知'
+  }
+}
+
+const refreshLimits = () => {
+  const priceValue = Number(price.value)
+  if (!priceValue) {
+    maxBuyQuantity.value = 0
+  } else {
+    maxBuyQuantity.value = Math.floor(availableFunds.value / priceValue / 100) * 100
+  }
+
+  if (symbol.value) {
+    const holding = store.holdingsMap.value.get(symbol.value)
+    availableShares.value = holding?.availableShares ?? 0
+  } else {
+    availableShares.value = 0
   }
 }
 
@@ -78,10 +99,12 @@ const validate = () => {
   const qtyValue = Number(quantity.value)
 
   if (!symbol.value.trim()) issues.push('请输入股票代码')
+  if (!stockName.value) issues.push('股票不存在')
   if (!priceValue || priceValue <= 0) issues.push('请输入有效委托价格')
   if (!qtyValue || qtyValue <= 0) issues.push('请输入有效委托数量')
+  if (qtyValue && qtyValue % 100 !== 0) issues.push('委托数量需为 100 的整数倍')
 
-  if (priceValue) {
+  if (priceValue && lastPrice.value) {
     if (priceValue > limitUp.value || priceValue < limitDown.value) {
       issues.push('委托价格超出涨跌停范围')
     }
@@ -103,38 +126,56 @@ const validate = () => {
 
 const handlePreview = () => {
   submitMessage.value = ''
+  submitError.value = ''
   preview.value = validate()
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!validate()) {
     preview.value = false
     return
   }
 
-  const order: OrderItem = {
-    id: `ORD-${Date.now()}`,
-    createdAt: new Date().toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-    symbol: symbol.value.trim(),
-    name: stockName.value || '—',
-    side: side.value === 'buy' ? '买入' : '卖出',
-    price: Number(price.value),
-    quantity: Number(quantity.value),
-    filledQuantity: 0,
-    status: '未成交',
+  loading.value = true
+  submitMessage.value = ''
+  submitError.value = ''
+  try {
+    const order = await store.placeOrder({
+      symbol: symbol.value.trim(),
+      side: side.value === 'buy' ? '买入' : '卖出',
+      price: Number(price.value),
+      quantity: Number(quantity.value),
+      note: note.value.trim(),
+    })
+    submitMessage.value = `委托已提交，编号 ${order.id}，状态 ${order.status}`
+    preview.value = false
+    refreshLimits()
+  } catch (error) {
+    submitError.value = error instanceof Error ? error.message : '委托提交失败'
+  } finally {
+    loading.value = false
   }
-  orders.value = addOrder(order)
-  submitMessage.value = '委托已提交，等待撮合。'
-  preview.value = false
 }
 
-onMounted(() => {
-  orders.value = loadOrders()
-  fetchStockSnapshot()
+const openOrders = () => {
+  router.push('/orders')
+}
+
+onMounted(async () => {
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  await Promise.all([store.refreshFunds(), store.refreshHoldings(), store.refreshOrders()])
+  await fetchStockSnapshot()
+  refreshLimits()
 })
 
-watch(symbol, () => {
-  fetchStockSnapshot()
+watch(symbol, async () => {
+  await fetchStockSnapshot()
+  refreshLimits()
+})
+
+watch([price, () => store.state.funds], () => {
+  refreshLimits()
 })
 
 watch(
@@ -153,7 +194,7 @@ watch(
 <template>
   <AppShell title="交易" subtitle="提交买卖委托与风控校验" :showSearch="false">
     <template #actions>
-      <button class="btn btn-ghost" type="button">查看委托</button>
+      <button class="btn btn-ghost" type="button" @click="openOrders">查看委托</button>
     </template>
 
     <section class="layout-split">
@@ -213,10 +254,11 @@ watch(
           <div v-if="errors.length" class="form-hint price-down">
             {{ errors.join('，') }}
           </div>
+          <div v-if="submitError" class="form-hint price-down">{{ submitError }}</div>
           <div class="ticket-actions">
             <button class="btn btn-ghost" type="button" @click="handlePreview">预览</button>
             <button class="btn btn-primary" type="button" :disabled="!canSubmit" @click="handleSubmit">
-              提交委托
+              {{ loading ? '提交中...' : '提交委托' }}
             </button>
           </div>
         </form>
@@ -246,6 +288,10 @@ watch(
             <div class="metric">
               <div class="metric-label">跌停价</div>
               <div class="metric-value">{{ limitDown }}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">买一 / 卖一</div>
+              <div class="metric-value">{{ bidPrice || '--' }} / {{ askPrice || '--' }}</div>
             </div>
           </div>
         </div>

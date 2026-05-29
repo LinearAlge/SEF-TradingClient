@@ -2,40 +2,23 @@
 import { computed, onMounted, ref } from 'vue'
 import AppShell from '../components/AppShell.vue'
 import OrderListTable from '../components/OrderListTable.vue'
-import { loadFills, loadOrders, updateOrderStatus } from '../utils/tradingLocalStore'
+import { useTradingStore } from '../composables/useTradingStore'
 
-type OrderItem = {
-  id: string
-  createdAt: string
-  symbol: string
-  name?: string
-  side: '买入' | '卖出'
-  price: number
-  quantity: number
-  filledQuantity: number
-  avgPrice?: number
-  status: '未成交' | '部分成交' | '已成交' | '已撤单' | '已过期' | '已拒绝'
-}
+const store = useTradingStore()
 
-type FillItem = {
-  id: string
-  createdAt: string
-  orderId: string
-  symbol: string
-  side: '买入' | '卖出'
-  price: number
-  quantity: number
-}
-
-const filters = ['全部', '可撤', '未成交', '部分成交', '已成交', '已撤单', '已过期']
+const filters = ['全部', '可撤', '未成交', '部分成交', '已成交', '已撤单', '已拒绝']
 const activeFilter = ref('全部')
-const orders = ref<OrderItem[]>([])
-const fills = ref<FillItem[]>([])
 const searchText = ref('')
 const lastUpdated = ref('尚未刷新')
+const actionMessage = ref('')
+const actionError = ref('')
+const selectedIds = ref<string[]>([])
+
+const orders = computed(() => store.state.orders)
+const fills = computed(() => store.state.fills)
 
 const filteredOrders = computed(() => {
-  let result = orders.value
+  let result = [...orders.value]
   if (activeFilter.value === '可撤') {
     result = result.filter((item) => ['未成交', '部分成交'].includes(item.status))
   } else if (activeFilter.value !== '全部') {
@@ -51,32 +34,66 @@ const filteredOrders = computed(() => {
   return result
 })
 
-const handleCancel = (order: OrderItem) => {
-  const target = orders.value.find((item) => item.id === order.id)
-  if (target && (target.status === '未成交' || target.status === '部分成交')) {
-    orders.value = updateOrderStatus(target.id, '已撤单')
+const handleSearch = (value: string) => {
+  searchText.value = value
+}
+
+const toggleSelection = (order: typeof orders.value[number]) => {
+  if (selectedIds.value.includes(order.id)) {
+    selectedIds.value = selectedIds.value.filter((id) => id !== order.id)
+  } else {
+    selectedIds.value = [...selectedIds.value, order.id]
   }
 }
 
-onMounted(() => {
-  orders.value = loadOrders()
-  fills.value = loadFills()
-  lastUpdated.value = new Date().toLocaleTimeString('zh-CN', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-})
+const handleCancel = async (order: typeof orders.value[number]) => {
+  actionMessage.value = ''
+  actionError.value = ''
+  try {
+    await store.cancelOrder(order.id)
+    actionMessage.value = `委托 ${order.id} 已撤单`
+  } catch (error) {
+    actionError.value = error instanceof Error ? error.message : '撤单失败'
+  }
+}
 
-const refreshOrders = () => {
-  orders.value = loadOrders()
-  fills.value = loadFills()
+const handleBatchCancel = async () => {
+  actionMessage.value = ''
+  actionError.value = ''
+  const targetIds = selectedIds.value.length > 0 ? selectedIds.value : orders.value.map((item) => item.id)
+  const cancellable = orders.value.filter(
+    (item) => targetIds.includes(item.id) && ['未成交', '部分成交'].includes(item.status),
+  )
+  if (cancellable.length === 0) {
+    actionError.value = '暂无可撤单的委托'
+    return
+  }
+
+  try {
+    for (const order of cancellable) {
+      await store.cancelOrder(order.id)
+    }
+    actionMessage.value = '批量撤单完成'
+    selectedIds.value = []
+  } catch (error) {
+    actionError.value = error instanceof Error ? error.message : '批量撤单失败'
+  }
+}
+
+const refreshOrders = async () => {
+  await Promise.all([store.refreshOrders(), store.refreshFills()])
   lastUpdated.value = new Date().toLocaleTimeString('zh-CN', {
     hour12: false,
     hour: '2-digit',
     minute: '2-digit',
   })
 }
+
+onMounted(async () => {
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  await refreshOrders()
+})
 </script>
 
 <template>
@@ -88,11 +105,11 @@ const refreshOrders = () => {
     :showRefresh="true"
     refreshLabel="刷新委托"
     :onRefresh="refreshOrders"
-    :onSearch="(value) => { searchText.value = value }"
+    :onSearch="handleSearch"
     :lastUpdated="lastUpdated"
   >
     <template #actions>
-      <button class="btn btn-ghost" type="button">批量撤单</button>
+      <button class="btn btn-ghost" type="button" @click="handleBatchCancel">批量撤单</button>
     </template>
 
     <div class="order-filters">
@@ -108,7 +125,18 @@ const refreshOrders = () => {
       </button>
     </div>
 
-    <OrderListTable title="全部委托" subtitle="近 30 日记录" :items="filteredOrders" @cancel="handleCancel" />
+    <OrderListTable
+      title="全部委托"
+      subtitle="近 30 日记录"
+      :items="filteredOrders"
+      selectable
+      :selectedIds="selectedIds"
+      @toggle="toggleSelection"
+      @cancel="handleCancel"
+    />
+
+    <div v-if="actionMessage" class="form-hint price-up">{{ actionMessage }}</div>
+    <div v-if="actionError" class="form-hint price-down">{{ actionError }}</div>
 
     <div class="card">
       <div class="card-title">成交回报</div>

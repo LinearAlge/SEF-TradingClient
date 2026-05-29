@@ -7,9 +7,10 @@ import {
   loadStoredKeyPair,
   signChallenge,
 } from '../utils/certificateStore'
-import { addLoginRecord } from '../utils/tradingLocalStore'
+import { useTradingStore } from '../composables/useTradingStore'
 
 const router = useRouter()
+const store = useTradingStore()
 const account = ref('')
 const password = ref('')
 const phone = ref('')
@@ -78,13 +79,8 @@ const handleLogin = async () => {
       }
 
       localStorage.setItem('trading-account', account.value.trim())
-      addLoginRecord({
-        id: `LOG-${Date.now()}`,
-        time: new Date().toLocaleString('zh-CN', { hour12: false }),
-        method: '证书登录',
-        device: 'Windows 终端',
-        status: '成功',
-      })
+      store.setAccount(account.value.trim())
+      await store.recordLogin({ method: '证书登录', device: 'Windows 终端', status: '成功' })
       router.push('/dashboard')
       return
     }
@@ -109,25 +105,15 @@ const handleLogin = async () => {
       }
 
       localStorage.setItem('trading-account', account.value.trim())
-      addLoginRecord({
-        id: `LOG-${Date.now()}`,
-        time: new Date().toLocaleString('zh-CN', { hour12: false }),
-        method: '证书登录',
-        device: 'Windows 终端',
-        status: '成功',
-      })
+      store.setAccount(account.value.trim())
+      await store.recordLogin({ method: '证书登录', device: 'Windows 终端', status: '成功' })
       router.push('/dashboard')
       return
     }
 
     localStorage.setItem('trading-account', account.value.trim())
-    addLoginRecord({
-      id: `LOG-${Date.now()}`,
-      time: new Date().toLocaleString('zh-CN', { hour12: false }),
-      method: '密码登录',
-      device: 'Windows 终端',
-      status: '成功',
-    })
+    store.setAccount(account.value.trim())
+    await store.recordLogin({ method: '密码登录', device: 'Windows 终端', status: '成功' })
     router.push('/dashboard')
   } catch (error) {
     errorMessage.value = '无法连接测试服务，请确认后端已启动'
@@ -176,7 +162,7 @@ const handleRebind = async () => {
       <div class="login-left">
         <div class="login-brand">
           <img class="brand-icon" src="/favicon.ico" alt="App" />
-          栖木交易
+          新宇交易
         </div>
         <h1>统一交易工作台</h1>
         <h2 class="login-headline">资金、持仓与委托实时掌控</h2>

@@ -1,58 +1,44 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import StatCard from '../components/StatCard.vue'
 import HoldingsTable from '../components/HoldingsTable.vue'
 import OrderListTable from '../components/OrderListTable.vue'
 import PriceTicker from '../components/PriceTicker.vue'
-import { loadAlerts, loadFills, loadOrders } from '../utils/tradingLocalStore'
+import { useTradingStore } from '../composables/useTradingStore'
 
-type FundsSnapshot = {
-  available: number
-  frozen: number
-  marketValue: number
-  totalEquity: number
-  updatedAt?: string
-}
+const store = useTradingStore()
+const router = useRouter()
 
-const funds = ref<FundsSnapshot | null>(null)
-const fundsError = ref('')
-const tickerItems = ref<{ symbol: string; name: string; price: string; change: string; tone: 'positive' | 'negative' | 'neutral' }[]>([])
+const tickerItems = ref<{
+  symbol: string
+  name: string
+  price: string
+  change: string
+  tone: 'positive' | 'negative' | 'neutral'
+}[]>([])
 const refreshKey = ref(0)
 const lastUpdated = ref('尚未刷新')
 
-type OrderItem = {
-  id: string
-  createdAt: string
-  symbol: string
-  name?: string
-  side: '买入' | '卖出'
-  price: number
-  quantity: number
-  filledQuantity: number
-  avgPrice?: number
-  status: '未成交' | '部分成交' | '已成交' | '已撤单' | '已过期' | '已拒绝'
-}
-
-type FillItem = {
-  id: string
-  createdAt: string
-  symbol: string
-  side: '买入' | '卖出'
-  price: number
-  quantity: number
-}
-
-const latestOrders = ref<OrderItem[]>([])
-const latestFills = ref<FillItem[]>([])
-const todos = ref([
-  { label: '未成交委托', value: 0 },
-  { label: '部分成交', value: 0 },
-  { label: '可撤单', value: 0 },
-  { label: '已触发提醒', value: 0 },
-])
-
-const accountId = computed(() => localStorage.getItem('trading-account') || 'admin')
+const funds = computed(() => store.state.funds)
+const fundsError = computed(() => store.state.error)
+const latestOrders = computed(() => store.state.orders.slice(0, 5))
+const latestFills = computed(() => store.state.fills.slice(0, 5))
+const todos = computed(() => {
+  const orders = store.state.orders
+  const alerts = store.state.alerts
+  const pending = orders.filter((item) => item.status === '未成交').length
+  const partial = orders.filter((item) => item.status === '部分成交').length
+  const cancellable = orders.filter((item) => ['未成交', '部分成交'].includes(item.status)).length
+  const triggered = alerts.filter((item) => item.status === '已触发').length
+  return [
+    { label: '未成交委托', value: pending },
+    { label: '部分成交', value: partial },
+    { label: '可撤单', value: cancellable },
+    { label: '已触发提醒', value: triggered },
+  ]
+})
 
 const formatCurrency = (value?: number) => {
   if (value === undefined || value === null) {
@@ -91,26 +77,6 @@ const formatNumber = (value?: number) => {
   }).format(value)
 }
 
-const fetchFunds = async () => {
-  fundsError.value = ''
-  try {
-    const response = await fetch(
-      `http://localhost:3003/funds?account=${encodeURIComponent(accountId.value)}`,
-    )
-    const payload = await response.json().catch(() => ({}))
-    if (!response.ok || !payload.ok) {
-      fundsError.value = payload.message || '资金信息加载失败'
-      funds.value = null
-      return
-    }
-
-    funds.value = payload
-  } catch (error) {
-    fundsError.value = '无法连接资金服务'
-    funds.value = null
-  }
-}
-
 const fetchTicker = async () => {
   try {
     const response = await fetch('http://localhost:3004/stocks?board=主板')
@@ -133,30 +99,16 @@ const fetchTicker = async () => {
   }
 }
 
-const loadWorkbenchData = () => {
-  const orders = loadOrders()
-  const fills = loadFills()
-  const alerts = loadAlerts()
-  latestOrders.value = orders.slice(0, 5)
-  latestFills.value = fills.slice(0, 5)
-
-  const pending = orders.filter((item) => item.status === '未成交').length
-  const partial = orders.filter((item) => item.status === '部分成交').length
-  const cancellable = orders.filter((item) => ['未成交', '部分成交'].includes(item.status)).length
-  const triggered = alerts.filter((item) => item.status === '已触发').length
-  todos.value = [
-    { label: '未成交委托', value: pending },
-    { label: '部分成交', value: partial },
-    { label: '可撤单', value: cancellable },
-    { label: '已触发提醒', value: triggered },
-  ]
-}
-
-const refreshDashboard = () => {
+const refreshDashboard = async () => {
   refreshKey.value += 1
-  fetchFunds()
-  loadWorkbenchData()
-  fetchTicker()
+  await Promise.all([
+    store.refreshFunds(),
+    store.refreshHoldings(),
+    store.refreshOrders(),
+    store.refreshFills(),
+    store.refreshAlerts(),
+  ])
+  await fetchTicker()
   lastUpdated.value = new Date().toLocaleTimeString('zh-CN', {
     hour12: false,
     hour: '2-digit',
@@ -164,8 +116,14 @@ const refreshDashboard = () => {
   })
 }
 
-onMounted(() => {
-  refreshDashboard()
+const openTrade = () => {
+  router.push('/trade')
+}
+
+onMounted(async () => {
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  await refreshDashboard()
 })
 </script>
 
@@ -180,7 +138,7 @@ onMounted(() => {
     :lastUpdated="lastUpdated"
   >
     <template #actions>
-      <button class="btn btn-primary" type="button">新建委托</button>
+      <button class="btn btn-primary" type="button" @click="openTrade">新建委托</button>
     </template>
 
     <section class="metric-strip">

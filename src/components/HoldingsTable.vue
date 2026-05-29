@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTradingStore } from '../composables/useTradingStore'
 
 type HoldingItem = {
   symbol: string
@@ -13,11 +15,12 @@ type HoldingItem = {
   pnlRate: number
 }
 
-const holdings = ref<HoldingItem[]>([])
-const loading = ref(false)
-const errorMessage = ref('')
-const asOf = ref('')
-const totalMarketValue = ref(0)
+const store = useTradingStore()
+const holdings = computed(() => store.state.holdings)
+const loading = computed(() => store.state.loading.holdings)
+const errorMessage = computed(() => store.state.error)
+const asOf = computed(() => store.state.holdingsMeta.asOf)
+const totalMarketValue = computed(() => store.state.holdingsMeta.totalMarketValue)
 const now = ref(Date.now())
 
 let clockTimer: ReturnType<typeof setInterval> | null = null
@@ -25,6 +28,8 @@ let clockTimer: ReturnType<typeof setInterval> | null = null
 const props = defineProps<{
   refreshKey?: number
 }>()
+
+const router = useRouter()
 
 const accountId = computed(() => localStorage.getItem('trading-account') || 'admin')
 
@@ -63,34 +68,10 @@ const asOfLabel = computed(() => {
   return `更新于 ${timeText}（${relative}）`
 })
 
-const fetchHoldings = async () => {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const response = await fetch(
-      `http://localhost:3002/holdings?account=${encodeURIComponent(accountId.value)}`,
-    )
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok || !data.ok) {
-      errorMessage.value = data.message || '持仓数据加载失败'
-      holdings.value = []
-      return
-    }
-
-    holdings.value = data.holdings || []
-    asOf.value = data.asOf || ''
-    totalMarketValue.value = data.totalMarketValue || 0
-  } catch (error) {
-    errorMessage.value = '无法连接持仓服务'
-    holdings.value = []
-  } finally {
-    loading.value = false
-    now.value = Date.now()
-  }
-}
-
 onMounted(() => {
-  fetchHoldings()
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  store.refreshHoldings()
   clockTimer = setInterval(() => {
     now.value = Date.now()
   }, 60000)
@@ -99,7 +80,7 @@ onMounted(() => {
 watch(
   () => props.refreshKey,
   () => {
-    fetchHoldings()
+    store.refreshHoldings()
   },
 )
 
@@ -108,6 +89,14 @@ onUnmounted(() => {
     clearInterval(clockTimer)
   }
 })
+
+const goTrade = (symbol: string, side: 'buy' | 'sell') => {
+  router.push({ path: '/trade', query: { symbol, side } })
+}
+
+const goAlert = (symbol: string) => {
+  router.push({ path: '/alerts', query: { symbol } })
+}
 </script>
 
 <template>
@@ -166,9 +155,9 @@ onUnmounted(() => {
             </td>
             <td>
               <div class="inline-actions">
-                <button class="btn btn-small" type="button">买入</button>
-                <button class="btn btn-small" type="button">卖出</button>
-                <button class="btn btn-ghost btn-small" type="button">提醒</button>
+                <button class="btn btn-small" type="button" @click="goTrade(item.symbol, 'buy')">买入</button>
+                <button class="btn btn-small" type="button" @click="goTrade(item.symbol, 'sell')">卖出</button>
+                <button class="btn btn-ghost btn-small" type="button" @click="goAlert(item.symbol)">提醒</button>
               </div>
             </td>
           </tr>

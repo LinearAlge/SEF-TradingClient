@@ -1,52 +1,68 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import PriceTicker from '../components/PriceTicker.vue'
-import { addAlert, loadAlerts, saveAlerts } from '../utils/tradingLocalStore'
+import { useTradingStore } from '../composables/useTradingStore'
 
-type AlertItem = {
-  id: string
-  symbol: string
-  condition: string
-  currentPrice: string
-  triggerPrice: string
-  status: '监控中' | '已暂停' | '已触发'
-  lastTriggered: string
-}
-
-const alerts = ref<AlertItem[]>([])
-
+const store = useTradingStore()
+const alerts = computed(() => store.state.alerts)
 const showCreate = ref(false)
 const newSymbol = ref('')
 const newCondition = ref('高于')
 const newPrice = ref('')
 const tickerItems = ref<{ symbol: string; name: string; price: string; change: string; tone: 'positive' | 'negative' | 'neutral' }[]>([])
 const route = useRoute()
+const actionMessage = ref('')
+const actionError = ref('')
 
-const handleCreate = () => {
-  if (!newSymbol.value.trim() || !newPrice.value.trim()) return
-  alerts.value = addAlert({
-    id: `ALT-${Date.now()}`,
-    symbol: newSymbol.value.trim(),
-    condition: newCondition.value,
-    currentPrice: '--',
-    triggerPrice: newPrice.value.trim(),
-    status: '监控中',
-    lastTriggered: '--',
-  })
-  newSymbol.value = ''
-  newPrice.value = ''
-  showCreate.value = false
+const handleCreate = async () => {
+  actionMessage.value = ''
+  actionError.value = ''
+  if (!newSymbol.value.trim() || !newPrice.value.trim()) {
+    actionError.value = '请填写股票代码与触发价'
+    return
+  }
+  try {
+    await store.createAlert({
+      symbol: newSymbol.value.trim(),
+      condition: newCondition.value,
+      triggerPrice: newPrice.value.trim(),
+    })
+    newSymbol.value = ''
+    newPrice.value = ''
+    showCreate.value = false
+    actionMessage.value = '提醒已保存'
+  } catch (error) {
+    actionError.value = error instanceof Error ? error.message : '提醒创建失败'
+  }
 }
 
-const toggleAlert = (item: AlertItem) => {
-  item.status = item.status === '已暂停' ? '监控中' : '已暂停'
-  saveAlerts(alerts.value)
+const toggleAlert = async (item: typeof alerts.value[number]) => {
+  actionMessage.value = ''
+  actionError.value = ''
+  const nextStatus = item.status === '已暂停' ? '监控中' : '已暂停'
+  try {
+    await store.updateAlert(item.id, { status: nextStatus })
+    actionMessage.value = nextStatus === '已暂停' ? '提醒已暂停' : '提醒已恢复'
+  } catch (error) {
+    actionError.value = error instanceof Error ? error.message : '更新提醒失败'
+  }
+}
+
+const removeAlert = async (item: typeof alerts.value[number]) => {
+  actionMessage.value = ''
+  actionError.value = ''
+  try {
+    await store.deleteAlert(item.id)
+    actionMessage.value = '提醒已删除'
+  } catch (error) {
+    actionError.value = error instanceof Error ? error.message : '删除提醒失败'
+  }
 }
 
 const refreshPrices = async () => {
-  const items = [...alerts.value]
+  const items = alerts.value.map((item) => ({ ...item }))
   await Promise.all(
     items.map(async (item) => {
       try {
@@ -56,14 +72,26 @@ const refreshPrices = async () => {
         const payload = await response.json().catch(() => ({}))
         if (response.ok && payload.ok) {
           item.currentPrice = Number(payload.stock?.lastPrice || 0).toFixed(2)
+          const current = Number(item.currentPrice)
+          const trigger = Number(item.triggerPrice)
+          if (item.status === '监控中') {
+            if (item.condition === '高于' && current >= trigger) {
+              item.status = '已触发'
+              item.lastTriggered = new Date().toLocaleString('zh-CN', { hour12: false })
+            }
+            if (item.condition === '低于' && current <= trigger) {
+              item.status = '已触发'
+              item.lastTriggered = new Date().toLocaleString('zh-CN', { hour12: false })
+            }
+          }
         }
       } catch (error) {
         // ignore
       }
     }),
   )
-  alerts.value = items
-  saveAlerts(items)
+
+  await Promise.all(items.map((item) => store.updateAlert(item.id, item)))
 }
 
 const refreshTicker = async () => {
@@ -92,19 +120,25 @@ const handleTickerSelect = (symbol: string) => {
   showCreate.value = true
 }
 
-onMounted(() => {
-  alerts.value = loadAlerts()
-  if (alerts.value.length === 0) {
-    alerts.value = addAlert({
-      id: 'ALT-01',
-      symbol: '600001',
-      condition: '高于',
-      currentPrice: '--',
-      triggerPrice: '120.00',
-      status: '监控中',
-      lastTriggered: '--',
-    })
+const pauseAll = async () => {
+  actionMessage.value = ''
+  actionError.value = ''
+  try {
+    await Promise.all(
+      alerts.value
+        .filter((item) => item.status === '监控中')
+        .map((item) => store.updateAlert(item.id, { status: '已暂停' })),
+    )
+    actionMessage.value = '已暂停所有提醒'
+  } catch (error) {
+    actionError.value = error instanceof Error ? error.message : '批量暂停失败'
   }
+}
+
+onMounted(async () => {
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  await store.refreshAlerts()
   if (typeof route.query.symbol === 'string') {
     newSymbol.value = route.query.symbol
     showCreate.value = true
@@ -125,9 +159,11 @@ onMounted(() => {
         <div class="card-title">提醒列表</div>
         <div class="card-subtitle">条件、状态与触发记录</div>
         <div class="inline-actions alert-actions">
-          <button class="btn btn-ghost btn-small" type="button">全部暂停</button>
+          <button class="btn btn-ghost btn-small" type="button" @click="pauseAll">全部暂停</button>
           <button class="btn btn-ghost btn-small" type="button" @click="refreshPrices">刷新价格</button>
         </div>
+        <div v-if="actionMessage" class="form-hint price-up">{{ actionMessage }}</div>
+        <div v-if="actionError" class="form-hint price-down">{{ actionError }}</div>
         <table class="table">
           <thead>
             <tr>
@@ -166,7 +202,7 @@ onMounted(() => {
                   <button class="btn btn-small" type="button" @click="toggleAlert(item)">
                     {{ item.status === '已暂停' ? '恢复' : '暂停' }}
                   </button>
-                  <button class="btn btn-ghost btn-small" type="button">编辑</button>
+                  <button class="btn btn-ghost btn-small" type="button" @click="removeAlert(item)">删除</button>
                 </div>
               </td>
             </tr>

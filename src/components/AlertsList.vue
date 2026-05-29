@@ -1,21 +1,15 @@
 <script setup lang="ts">
-const alerts = [
-  {
-    symbol: 'QST',
-    trigger: '价格高于 115.00',
-    status: '监控中',
-  },
-  {
-    symbol: 'NVA',
-    trigger: '价格低于 84.50',
-    status: '监控中',
-  },
-  {
-    symbol: 'LUM',
-    trigger: '成交量超过 300 万',
-    status: '已暂停',
-  },
-]
+import { computed, onMounted } from 'vue'
+import { useTradingStore } from '../composables/useTradingStore'
+
+const store = useTradingStore()
+const alerts = computed(() => store.state.alerts)
+
+onMounted(() => {
+  const stored = localStorage.getItem('trading-account') || 'admin'
+  store.setAccount(stored)
+  store.refreshAlerts()
+})
 </script>
 
 <template>
@@ -23,10 +17,10 @@ const alerts = [
     <div class="card-title">价格提醒</div>
     <div class="card-subtitle">自定义触发条件</div>
     <ul class="alert-list">
-      <li v-for="alert in alerts" :key="alert.symbol" class="alert-item">
+      <li v-for="alert in alerts" :key="alert.id" class="alert-item">
         <div>
           <div class="alert-symbol">{{ alert.symbol }}</div>
-          <div class="alert-trigger">{{ alert.trigger }}</div>
+          <div class="alert-trigger">{{ alert.condition }} {{ alert.triggerPrice }}</div>
         </div>
         <span class="chip">{{ alert.status }}</span>
       </li>
