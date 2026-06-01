@@ -9,6 +9,7 @@ import {
 } from '../utils/certificateStore'
 import { useTradingStore } from '../composables/useTradingStore'
 import { applyClientAccess, authEnroll, authLogin, authRebind, authVerify } from '../services/clientApi'
+import { clearSession, saveSession } from '../services/sessionStore'
 
 const router = useRouter()
 const store = useTradingStore()
@@ -26,6 +27,16 @@ const applyMessage = ref('')
 const applyError = ref('')
 
 const certStatusText = computed(() => certStatus.value || '未检测到证书')
+
+const persistSession = (payload: Record<string, unknown>) => {
+  saveSession({
+    token: payload.token as string | undefined,
+    investorId: payload.investorId as string | undefined,
+    fundAccountId: payload.fundAccountId as string | undefined,
+    securityAccountId: payload.securityAccountId as string | undefined,
+    expiresAt: payload.expiresAt as string | undefined,
+  })
+}
 
 const updateCertStatus = async () => {
   const stored = await loadStoredKeyPair()
@@ -60,14 +71,17 @@ const handleLogin = async () => {
       return
     }
 
+    persistSession(data)
+
     if (data.action === 'enroll') {
       const { publicJwk } = await ensureStoredKeyPair()
       await updateCertStatus()
       try {
-        await authEnroll({
+        const enrollResult = await authEnroll({
           account: account.value.trim(),
           publicKey: publicJwk,
         })
+        persistSession(enrollResult)
       } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : '证书绑定失败'
         return
@@ -75,6 +89,7 @@ const handleLogin = async () => {
 
       localStorage.setItem('trading-account', account.value.trim())
       store.setAccount(account.value.trim())
+      store.connectOrderStream()
       await store.recordLogin({ method: '证书登录', device: 'Windows 终端', status: '成功' })
       router.push('/dashboard')
       return
@@ -90,10 +105,11 @@ const handleLogin = async () => {
 
       const signature = await signChallenge(stored.privateKey, data.challenge)
       try {
-        await authVerify({
+        const verifyResult = await authVerify({
           account: account.value.trim(),
           signature,
         })
+        persistSession(verifyResult)
       } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : '证书验证失败'
         return
@@ -101,6 +117,7 @@ const handleLogin = async () => {
 
       localStorage.setItem('trading-account', account.value.trim())
       store.setAccount(account.value.trim())
+      store.connectOrderStream()
       await store.recordLogin({ method: '证书登录', device: 'Windows 终端', status: '成功' })
       router.push('/dashboard')
       return
@@ -108,6 +125,7 @@ const handleLogin = async () => {
 
     localStorage.setItem('trading-account', account.value.trim())
     store.setAccount(account.value.trim())
+    store.connectOrderStream()
     await store.recordLogin({ method: '密码登录', device: 'Windows 终端', status: '成功' })
     router.push('/dashboard')
   } catch (error) {
@@ -162,6 +180,7 @@ const handleRebind = async () => {
 
     await clearStoredKeyPair()
     await updateCertStatus()
+    clearSession()
     infoMessage.value = '证书已重置，请重新登录以绑定新证书'
   } catch (error) {
     errorMessage.value = '无法连接测试服务，请确认后端已启动'

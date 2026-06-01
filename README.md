@@ -1,6 +1,6 @@
 # TradingClient
 
-股票交易系统客户端（实验项目子系统）。本项目提供交易客户端前端、客户端统一网关、客户端自有 SQLite，以及用于独立跑通的 mock 外部服务。
+股票交易系统客户端（实验项目子系统）。本项目提供交易客户端前端与统一 FastAPI 后端，包含 CLIENT 模块与本地 mock 外部服务。
 
 ## 功能范围
 
@@ -16,8 +16,8 @@
 ## 技术栈
 
 - 前端：Vue 3 + Vite + Vue Router + Pinia
-- 后端：Node.js (CJS)
-- 数据库：SQLite (better-sqlite3)
+- 后端：Python 3.11+ + FastAPI
+- 数据库：SQLite (SQLAlchemy)
 - Mock 数据：JSON 文件
 
 ## 快速启动
@@ -28,10 +28,11 @@
 npm install
 ```
 
-2) 启动网关 + mock 服务
+2) 启动统一后端
 
-```cmd
-.\start-gateway.cmd
+```bash
+pip install fastapi uvicorn pydantic sqlalchemy python-multipart cryptography
+python -m uvicorn backend_fastapi.main:app --reload --port 8000
 ```
 
 3) 启动前端
@@ -44,7 +45,7 @@ npm run dev
 
 ## 测试账号
 
-来自 backend/mocks/data/mock-funds-db.json：
+来自 backend_fastapi/mock_modules/data/mock-funds-db.json：
 
 - 账号：admin
 - 交易密码：123456
@@ -58,13 +59,10 @@ npm run dev
 ## 常用脚本
 
 - `npm run dev`：启动前端
-- `npm run dev:gateway`：仅启动客户端网关/后端
-- `npm run dev:mock:funds`：仅启动资金 mock
-- `npm run dev:mock:securities`：仅启动证券 mock
-- `npm run dev:mock:exchange`：仅启动撮合 mock
-- `npm run dev:mock:market`：仅启动行情 mock
-- `start-gateway.cmd`：一键启动网关 + mock 服务
-- `stop-gateway.cmd`：停止客户端后端网关 + mock 服务
+- `npm run dev:backend`：启动 FastAPI 后端
+- `npm run dev:unified`：同时启动前端 + FastAPI 后端
+- `start-unified.cmd`：一键启动 FastAPI + 前端（Windows）
+- `stop-unified.cmd`：停止本地 FastAPI + 前端（Windows）
 - `reset-client-db.cmd`：删除客户端 SQLite 数据库 / 重置客户端数据状态（如权限重置、登录状态重置等，用于测试）
 
 ## 文档入口

@@ -32,6 +32,8 @@ const props = defineProps<{
 const router = useRouter()
 
 const accountId = computed(() => localStorage.getItem('trading-account') || 'admin')
+const watchlist = computed(() => store.state.watchlist)
+const isWatchlisted = (symbol: string) => watchlist.value.includes(symbol)
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('zh-CN', {
@@ -97,6 +99,10 @@ const goTrade = (symbol: string, side: 'buy' | 'sell') => {
 const goAlert = (symbol: string) => {
   router.push({ path: '/alerts', query: { symbol } })
 }
+
+const toggleWatchlist = async (symbol: string) => {
+  await store.toggleWatchlist(symbol)
+}
 </script>
 
 <template>
@@ -158,6 +164,9 @@ const goAlert = (symbol: string) => {
                 <button class="btn btn-small" type="button" @click="goTrade(item.symbol, 'buy')">买入</button>
                 <button class="btn btn-small" type="button" @click="goTrade(item.symbol, 'sell')">卖出</button>
                 <button class="btn btn-ghost btn-small" type="button" @click="goAlert(item.symbol)">提醒</button>
+                <button class="btn btn-ghost btn-small" type="button" @click="toggleWatchlist(item.symbol)">
+                  {{ isWatchlisted(item.symbol) ? '已自选' : '自选' }}
+                </button>
               </div>
             </td>
           </tr>

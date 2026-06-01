@@ -17,6 +17,7 @@ const props = defineProps<{
   error?: string
   asOfLabel?: string
   selectedSymbol?: string
+  watchlist?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -24,7 +25,10 @@ const emit = defineEmits<{
   (event: 'buy', symbol: string): void
   (event: 'sell', symbol: string): void
   (event: 'alert', symbol: string): void
+  (event: 'toggle-watchlist', symbol: string): void
 }>()
+
+const isWatchlisted = (symbol: string) => (props.watchlist || []).includes(symbol)
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat('zh-CN', {
@@ -105,6 +109,13 @@ const formatRate = (value?: number) => {
                 <button class="btn btn-small" type="button" @click.stop="emit('buy', item.symbol)">买入</button>
                 <button class="btn btn-small" type="button" @click.stop="emit('sell', item.symbol)">卖出</button>
                 <button class="btn btn-ghost btn-small" type="button" @click.stop="emit('alert', item.symbol)">提醒</button>
+                <button
+                  class="btn btn-ghost btn-small"
+                  type="button"
+                  @click.stop="emit('toggle-watchlist', item.symbol)"
+                >
+                  {{ isWatchlisted(item.symbol) ? '已自选' : '自选' }}
+                </button>
               </div>
             </td>
           </tr>

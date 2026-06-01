@@ -21,6 +21,7 @@ const tickerItems = ref<{
 }[]>([])
 const refreshKey = ref(0)
 const lastUpdated = ref('尚未刷新')
+const wsStatus = computed(() => store.state.wsStatus)
 
 const funds = computed(() => store.state.funds)
 const fundsError = computed(() => store.state.error)
@@ -123,7 +124,8 @@ const openTrade = () => {
 onMounted(async () => {
   const stored = localStorage.getItem('trading-account') || 'admin'
   store.setAccount(stored)
-  await refreshDashboard()
+  store.connectOrderStream()
+  await Promise.all([refreshDashboard(), store.refreshWatchlist(), store.refreshPreferences()])
 })
 </script>
 
@@ -136,6 +138,10 @@ onMounted(async () => {
     refreshLabel="刷新本页"
     :onRefresh="refreshDashboard"
     :lastUpdated="lastUpdated"
+    :statusItems="[
+      { label: '当前资金账号', value: store.state.accountId },
+      { label: '交易通道', value: wsStatus },
+    ]"
   >
     <template #actions>
       <button class="btn btn-primary" type="button" @click="openTrade">新建委托</button>

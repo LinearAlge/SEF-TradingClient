@@ -5,11 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:gateway": "node backend/client/client-gateway-server.cjs",
-    "dev:mock:funds": "node backend/mocks/mock-funds-service.cjs",
-    "dev:mock:securities": "node backend/mocks/mock-securities-service.cjs",
-    "dev:mock:exchange": "node backend/mocks/mock-exchange-service.cjs",
-    "dev:mock:market": "node backend/mocks/mock-market-service.cjs",
+    "dev:backend": "python -m uvicorn backend_fastapi.main:app --reload --port 8000",
+    "dev:unified": "run-p dev:backend dev",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",

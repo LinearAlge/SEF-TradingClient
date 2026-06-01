@@ -92,6 +92,7 @@ const refreshOrders = async () => {
 onMounted(async () => {
   const stored = localStorage.getItem('trading-account') || 'admin'
   store.setAccount(stored)
+  store.connectOrderStream()
   await refreshOrders()
 })
 </script>
@@ -107,6 +108,10 @@ onMounted(async () => {
     :onRefresh="refreshOrders"
     :onSearch="handleSearch"
     :lastUpdated="lastUpdated"
+    :statusItems="[
+      { label: '当前资金账号', value: store.state.accountId },
+      { label: '交易通道', value: store.state.wsStatus },
+    ]"
   >
     <template #actions>
       <button class="btn btn-ghost" type="button" @click="handleBatchCancel">批量撤单</button>

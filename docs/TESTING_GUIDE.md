@@ -2,15 +2,16 @@
 
 ## 1. 环境要求
 
-- Node.js: ^20.19.0 或 >=22.12.0
+- Python: 3.11+
 - npm: 随 Node 安装
-- SQLite: 项目使用 better-sqlite3，无需单独安装
-- 操作系统：Windows 已验证（提供 .cmd 脚本）
+- SQLite: SQLAlchemy + SQLite
+- 操作系统：Windows 已验证
 
 ## 2. 安装依赖
 
 ```bash
 npm install
+pip install fastapi uvicorn pydantic sqlalchemy python-multipart cryptography
 ```
 
 ## 3. 环境变量
@@ -18,24 +19,20 @@ npm install
 `.env` 当前包含：
 
 ```
-VITE_CLIENT_API_BASE=http://localhost:3010/api
-API_PROFILE=mock
-CLIENT_API_PORT=3010
-FUNDS_SERVICE_BASE_URL=http://localhost:3021
-SECURITIES_SERVICE_BASE_URL=http://localhost:3022
-EXCHANGE_SERVICE_BASE_URL=http://localhost:3023
-MARKET_SERVICE_BASE_URL=http://localhost:3024
+VITE_CLIENT_API_BASE=http://localhost:8000/api/client
+API_PROFILE=local_unified
+ENABLE_TRADE_WS=false
 ```
 
-说明：前端只需 `VITE_CLIENT_API_BASE`，后端服务端口通过 `*_BASE_URL` 指定。
+说明：前端只需 `VITE_CLIENT_API_BASE`。
 
 ## 4. 启动步骤
 
 1. 安装依赖
-2. 启动后端网关与 mock 服务
+2. 启动统一后端
 
-```cmd
-.\start-gateway.cmd
+```bash
+python -m uvicorn backend_fastapi.main:app --reload --port 8000
 ```
 
 3. 启动前端
@@ -48,7 +45,7 @@ npm run dev
 
 ## 5. 测试账号
 
-当前 mock 资金账户（来自 backend/mocks/data/mock-funds-db.json）：
+当前 mock 资金账户（来自 backend_fastapi/mock_modules/data/mock-funds-db.json）：
 
 - 账号：admin
 - 交易密码：123456
@@ -116,11 +113,12 @@ npm run dev
 
 ## 7. 常见问题
 
-- 端口占用：执行 `stop-gateway.cmd` 后再 `start-gateway.cmd`
-- 前端白屏：检查网关是否启动
+- 端口占用：检查是否有占用 8000/5173 的进程
+- 前端白屏：检查 FastAPI 后端是否启动
 - 登录失败：确认是否已申请客户端权限（第一次登录会要求申请）
 - 证书验证失败：清理浏览器 IndexedDB 后重新登录
-- 行情无数据：检查 mock market 服务是否运行
+- 行情无数据：检查 mock market 数据是否存在
+- 委托不刷新：确认 WebSocket 已连接，必要时刷新页面
 - 委托提交失败：检查 mock exchange 服务是否运行
 - SQLite 相关错误：运行 `reset-client-db.cmd` 后重启网关
 
@@ -133,8 +131,8 @@ npm run dev
 ```
 
 - 重置 mock 数据：直接编辑以下 JSON 文件或替换为原始 seed
-  - backend/mocks/data/mock-funds-db.json
-  - backend/mocks/data/mock-securities-db.json
-  - backend/mocks/data/mock-exchange-db.json
+  - backend_fastapi/mock_modules/data/mock-funds-db.json
+  - backend_fastapi/mock_modules/data/mock-securities-db.json
+  - backend_fastapi/mock_modules/data/mock-exchange-db.json
 
 重置后重启网关与 mock 服务。

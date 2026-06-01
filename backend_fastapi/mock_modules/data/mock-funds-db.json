@@ -1,0 +1,44 @@
+{
+  "accounts": {
+    "admin": {
+      "fundAccountId": "FUND000001",
+      "currency": "CNY",
+      "phone": "13800000000",
+      "idNumber": "110101199001011234",
+      "balances": {
+        "available": 169383.0,
+        "frozen": 0.0
+      },
+      "positions": [],
+      "frozenFunds": {
+        "CLI-1780319209": "15286.00",
+        "CLI-1780319247": "15331.00"
+      },
+      "asOf": "2026-06-01T21:07:27.348290+08:00"
+    }
+  },
+  "cashFlows": [
+    {
+      "id": "CASH-20260601210727",
+      "time": "2026/06/01 21:07:27",
+      "status": "已完成",
+      "account": "admin",
+      "type": "买入成交",
+      "amount": "-15331.00"
+    },
+    {
+      "id": "CASH-20260601210649",
+      "time": "2026/06/01 21:06:49",
+      "status": "已完成",
+      "account": "admin",
+      "type": "买入成交",
+      "amount": "-15286.00"
+    }
+  ],
+  "passwords": {
+    "admin": {
+      "trade": "123456",
+      "withdraw": "654321"
+    }
+  }
+}

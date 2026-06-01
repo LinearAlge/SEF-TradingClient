@@ -72,7 +72,7 @@ const handleWithdraw = async () => {
 onMounted(async () => {
   const stored = localStorage.getItem('trading-account') || 'admin'
   store.setAccount(stored)
-  await refreshFlows()
+  await Promise.all([refreshFlows(), store.refreshWatchlist(), store.refreshPreferences()])
 })
 </script>
 

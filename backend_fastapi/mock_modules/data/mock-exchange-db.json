@@ -1,0 +1,61 @@
+{
+  "accounts": {
+    "admin": {
+      "account": "admin"
+    }
+  },
+  "orders": [
+    {
+      "order_id": "ORD-20260601210727",
+      "investor_id": "INV000001",
+      "fund_account_id": "FUND000001",
+      "security_account_id": "SEC000001",
+      "stock_code": "600001",
+      "side": "BUY",
+      "order_price": "162.00",
+      "order_quantity": 100,
+      "filled_quantity": 100,
+      "remaining_quantity": 0,
+      "avg_fill_price": "153.31",
+      "status": "FILLED",
+      "submitted_at": "2026-06-01T21:07:27.274260+08:00"
+    },
+    {
+      "order_id": "ORD-20260601210649",
+      "investor_id": "INV000001",
+      "fund_account_id": "FUND000001",
+      "security_account_id": "SEC000001",
+      "stock_code": "600001",
+      "side": "BUY",
+      "order_price": "160.00",
+      "order_quantity": 100,
+      "filled_quantity": 100,
+      "remaining_quantity": 0,
+      "avg_fill_price": "152.86",
+      "status": "FILLED",
+      "submitted_at": "2026-06-01T21:06:49.147797+08:00"
+    }
+  ],
+  "fills": [
+    {
+      "trade_id": "TRD-20260601210727",
+      "stock_code": "600001",
+      "buy_order_id": "ORD-20260601210727",
+      "sell_order_id": null,
+      "trade_price": "153.31",
+      "trade_quantity": 100,
+      "traded_at": "2026-06-01T21:07:27.276262+08:00",
+      "investor_id": "INV000001"
+    },
+    {
+      "trade_id": "TRD-20260601210649",
+      "stock_code": "600001",
+      "buy_order_id": "ORD-20260601210649",
+      "sell_order_id": null,
+      "trade_price": "152.86",
+      "trade_quantity": 100,
+      "traded_at": "2026-06-01T21:06:49.147797+08:00",
+      "investor_id": "INV000001"
+    }
+  ]
+}

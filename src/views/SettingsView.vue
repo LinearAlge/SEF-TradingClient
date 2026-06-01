@@ -78,6 +78,8 @@ onMounted(() => {
   store.setAccount(stored)
   refreshLoginRecords()
   refreshCertStatus()
+  store.refreshWatchlist()
+  store.refreshPreferences()
 })
 </script>
 

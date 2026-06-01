@@ -2,7 +2,7 @@
 
 ## 1. 设计原则
 
-- 前端只依赖统一网关 `/api/*`
+- 前端只依赖统一网关 `/api/client/*`
 - 客户端组只维护“客户端自有数据”
 - 资金、持仓、委托、成交、行情等权威数据属于外部系统
 - mock 服务仅用于独立开发与联调前测试
@@ -12,30 +12,30 @@
 
 | 数据类型 | 当前实现位置 | 当前存储 | 正式归属 | 本组是否维护 | 后期替换方式 |
 | --- | --- | --- | --- | --- | --- |
-| 登录认证 | client gateway + authAdapter | SQLite | 客户端组 | 是 | 维持不变 |
+| 登录认证 | FastAPI CLIENT 模块 | SQLite | 客户端组 | 是 | 维持不变 |
 | 安全证书 | client SQLite + IndexedDB | SQLite + IndexedDB | 客户端组 | 是 | 维持不变 |
 | 登录记录 | client SQLite | SQLite | 客户端组 | 是 | 维持不变 |
 | 客户端申请 | client SQLite | SQLite | 客户端组 | 是 | 维持不变 |
 | 价格提醒 | client SQLite | SQLite | 客户端组 | 是 | 维持不变 |
 | 通知消息 | client SQLite | SQLite | 客户端组 | 是 | 维持不变 |
 | 自选股/偏好 | client SQLite | SQLite | 客户端组 | 是 | 维持不变 |
-| 资金余额 | mock funds service | JSON | 资金账户组 | 否 | 替换 fundsAdapter |
-| 冻结资金 | mock funds service | JSON | 资金账户组 | 否 | 替换 fundsAdapter |
-| 资金流水 | mock funds service | JSON | 资金账户组 | 否 | 替换 fundsAdapter |
-| 持仓 | mock securities service | JSON | 证券账户组 | 否 | 替换 securitiesAdapter |
-| 可卖数量 | mock securities service | JSON | 证券账户组 | 否 | 替换 securitiesAdapter |
-| 证券流水 | mock securities service | JSON | 证券账户组 | 否 | 替换 securitiesAdapter |
-| 委托 | mock exchange service | JSON | 中央交易系统 | 否 | 替换 exchangeAdapter |
-| 成交回报 | mock exchange service | JSON | 中央交易系统 | 否 | 替换 exchangeAdapter |
-| 行情 | mock market service | JSON | 信息发布系统 | 否 | 替换 marketAdapter |
-| 公告 | mock market service | JSON | 信息发布系统 | 否 | 替换 marketAdapter |
-| 涨跌停规则 | mock market service（简化） | JSON | 交易系统管理 | 否 | 需外部系统提供 |
+| 资金余额 | mock account router | JSON | 资金账户组 | 否 | 替换 account_adapter |
+| 冻结资金 | mock account router | JSON | 资金账户组 | 否 | 替换 account_adapter |
+| 资金流水 | mock account router | JSON | 资金账户组 | 否 | 替换 account_adapter |
+| 持仓 | mock account router | JSON | 证券账户组 | 否 | 替换 account_adapter |
+| 可卖数量 | mock account router | JSON | 证券账户组 | 否 | 替换 account_adapter |
+| 证券流水 | mock account router | JSON | 证券账户组 | 否 | 替换 account_adapter |
+| 委托 | mock trade router | JSON | 中央交易系统 | 否 | 替换 trade_adapter |
+| 成交回报 | mock trade router | JSON | 中央交易系统 | 否 | 替换 trade_adapter |
+| 行情 | mock info router | JSON | 信息发布系统 | 否 | 替换 info_adapter |
+| 公告 | mock info router | JSON | 信息发布系统 | 否 | 替换 info_adapter |
+| 涨跌停规则 | mock admin router（简化） | JSON | 交易系统管理 | 否 | 需外部系统提供 |
 | 停牌状态 | 当前未发现 | - | 交易系统管理 | 否 | 待补充 |
 
 ## 3. SQLite 数据库说明
 
-- 路径：backend/client/client.sqlite
-- 初始化：backend/client/client-db.cjs
+- 路径：backend_fastapi/client/client.sqlite
+- 初始化：backend_fastapi/client/database.py
 - 表结构：
   - client_users：账户与密码、首次登录标记
   - client_certificates：证书公钥
@@ -53,55 +53,49 @@
 
 ## 4. Mock 服务说明
 
-### Mock Funds Service
+### Mock Account Router
 
-- 入口：backend/mocks/mock-funds-service.cjs
-- 端口：3021
-- 数据源：backend/mocks/data/mock-funds-db.json
-- 模拟：资金账户系统
+- 入口：backend_fastapi/mock_modules/account_router.py
+- 数据源：backend_fastapi/mock_modules/data/mock-funds-db.json
+- 模拟：资金账户与证券账户系统
 - 主要接口：
-  - GET /funds
-  - GET /cash-flows
-  - POST /funds/deposit
-  - POST /funds/withdraw
-  - POST /passwords/trade
-  - POST /passwords/withdraw
-  - POST /passwords/trade/verify
-  - POST /funds/apply-fill
-  - GET /accounts
+  - GET /api/v1/account/fund-accounts/{fund_account_id}
+  - POST /api/v1/account/fund-accounts/{fund_account_id}/freeze
+  - POST /api/v1/account/fund-accounts/{fund_account_id}/release
+  - POST /api/v1/account/fund-accounts/{fund_account_id}/settlements
+  - GET /api/v1/account/security-accounts/{security_account_id}/positions
+  - POST /api/v1/account/security-accounts/{security_account_id}/positions/freeze
+  - POST /api/v1/account/security-accounts/{security_account_id}/positions/release
+  - POST /api/v1/account/security-accounts/{security_account_id}/positions/settlements
 
-### Mock Securities Service
+### Mock Trade Router
 
-- 入口：backend/mocks/mock-securities-service.cjs
-- 端口：3022
-- 数据源：backend/mocks/data/mock-securities-db.json
-- 模拟：证券账户系统
-- 主要接口：
-  - GET /holdings
-  - GET /stock-flows
-  - POST /positions/apply-fill
-
-### Mock Exchange Service
-
-- 入口：backend/mocks/mock-exchange-service.cjs
-- 端口：3023
-- 数据源：backend/mocks/data/mock-exchange-db.json
+- 入口：backend_fastapi/mock_modules/trade_router.py
+- 数据源：backend_fastapi/mock_modules/data/mock-exchange-db.json
 - 模拟：中央交易系统
 - 主要接口：
-  - GET /orders
-  - POST /orders
-  - POST /orders/:id/cancel
-  - GET /fills
+  - POST /api/v1/trade/orders
+  - GET /api/v1/trade/orders
+  - POST /api/v1/trade/orders/{order_id}/cancel
+  - GET /api/v1/trade/fills
 
-### Mock Market Service
+### Mock Info Router
 
-- 入口：backend/mocks/mock-market-service.cjs
-- 端口：3024
-- 数据源：backend/mocks/data/mock-market-db.json
+- 入口：backend_fastapi/mock_modules/info_router.py
+- 数据源：backend_fastapi/mock_modules/data/mock-market-db.json
 - 模拟：信息发布系统
 - 主要接口：
-  - GET /stocks
-- 行情自动更新：5 秒刷新一次
+  - GET /api/v1/info/stocks
+  - GET /api/v1/info/stocks/{stock_code}/quote
+
+### Mock Admin Router
+
+- 入口：backend_fastapi/mock_modules/admin_router.py
+- 数据源：backend_fastapi/mock_modules/data/mock-market-db.json
+- 模拟：交易系统管理
+- 主要接口：
+  - GET /api/v1/admin/stocks/{stock_code}/rule
+  - GET /api/v1/admin/trading-day/status
 
 ## 5. Adapter 设计说明
 

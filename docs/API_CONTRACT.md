@@ -4,7 +4,9 @@
 
 ## 1. 统一网关 API（前端只调用这一个端口来访问所有后端服务）
 
-Base URL: `VITE_CLIENT_API_BASE`（默认 http://localhost:3010/api）
+Base URL: `VITE_CLIENT_API_BASE`（默认 http://localhost:8000/api/client）
+
+说明：登录后会返回 `token`，前端需保存并在后续请求头加入 `Authorization: Bearer <token>`。
 
 前端只调用统一网关；网关内部再去调用 SQLite 与 mock 外部服务。
 
@@ -558,37 +560,37 @@ Response:
 }
 ```
 
-## 2. Mock 外部服务 API（网关内部调用）
+## 2. Mock 外部服务 API（后端内部调用）
 
-这些接口由 client-gateway-server 在后端调用，前端不直接访问。后期联调时由真实外部系统替换。
-### Mock Funds Service (3021)
+这些接口由 FastAPI CLIENT 模块在后端调用，前端不直接访问。后期联调时由真实外部系统替换。
 
-- GET /funds
-- GET /cash-flows
-- POST /funds/deposit
-- POST /funds/withdraw
-- POST /passwords/trade
-- POST /passwords/withdraw
-- POST /passwords/trade/verify
-- POST /funds/apply-fill
-- GET /accounts
+### Mock Account Router
 
-### Mock Securities Service (3022)
+- GET /api/v1/account/fund-accounts/{fund_account_id}
+- POST /api/v1/account/fund-accounts/{fund_account_id}/freeze
+- POST /api/v1/account/fund-accounts/{fund_account_id}/release
+- POST /api/v1/account/fund-accounts/{fund_account_id}/settlements
+- GET /api/v1/account/security-accounts/{security_account_id}/positions
+- POST /api/v1/account/security-accounts/{security_account_id}/positions/freeze
+- POST /api/v1/account/security-accounts/{security_account_id}/positions/release
+- POST /api/v1/account/security-accounts/{security_account_id}/positions/settlements
 
-- GET /holdings
-- GET /stock-flows
-- POST /positions/apply-fill
+### Mock Trade Router
 
-### Mock Exchange Service (3023)
+- POST /api/v1/trade/orders
+- GET /api/v1/trade/orders
+- POST /api/v1/trade/orders/{order_id}/cancel
+- GET /api/v1/trade/fills
 
-- GET /orders
-- POST /orders
-- POST /orders/:id/cancel
-- GET /fills
+### Mock Info Router
 
-### Mock Market Service (3024)
+- GET /api/v1/info/stocks
+- GET /api/v1/info/stocks/{stock_code}/quote
 
-- GET /stocks
+### Mock Admin Router
+
+- GET /api/v1/admin/stocks/{stock_code}/rule
+- GET /api/v1/admin/trading-day/status
 
 ## 3. 字段约定
 

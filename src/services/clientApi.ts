@@ -1,13 +1,28 @@
-const BASE_URL = import.meta.env.VITE_CLIENT_API_BASE || 'http://localhost:3010/api'
+const BASE_URL = import.meta.env.VITE_CLIENT_API_BASE || 'http://localhost:8000/api/client'
+
+import { getSessionToken, handleUnauthorized, isSessionExpired } from './sessionStore'
 
 const requestJson = async (path: string, options?: RequestInit) => {
+  const token = getSessionToken()
+  const baseHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (token && !isSessionExpired()) {
+    baseHeaders.Authorization = `Bearer ${token}`
+  }
+
   const response = await fetch(`${BASE_URL}${path}`, {
     headers: {
-      'Content-Type': 'application/json',
+      ...baseHeaders,
+      ...(options?.headers || {}),
     },
     ...options,
   })
   const data = await response.json().catch(() => ({}))
+  if (response.status === 401) {
+    handleUnauthorized(data.message || '登录已过期，请重新登录。')
+    throw new Error('UNAUTHORIZED')
+  }
   if (!response.ok || !data.ok) {
     const message = data.message || '请求失败'
     throw new Error(message)
@@ -16,14 +31,27 @@ const requestJson = async (path: string, options?: RequestInit) => {
 }
 
 export const authLogin = async (payload: { account: string; password: string }) => {
+  const token = getSessionToken()
+  const baseHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (token && !isSessionExpired()) {
+    baseHeaders.Authorization = `Bearer ${token}`
+  }
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: baseHeaders,
     body: JSON.stringify(payload),
   })
   const data = await response.json().catch(() => ({}))
+  if (response.status === 401) {
+    return {
+      ok: false,
+      status: response.status,
+      action: data.action,
+      message: data.message || '账号或密码错误',
+    }
+  }
   if (!response.ok || !data.ok) {
     return {
       ok: false,

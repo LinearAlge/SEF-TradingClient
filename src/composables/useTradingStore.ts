@@ -15,9 +15,13 @@ import {
   fetchHoldings,
   fetchLoginRecords,
   fetchOrders,
+  fetchPreferences,
   fetchStockFlows,
+  fetchWatchlist,
   placeOrder as apiPlaceOrder,
+  toggleWatchlist as apiToggleWatchlist,
   updateAlert as apiUpdateAlert,
+  updatePreferencesData,
   withdrawFunds,
 } from '../services/tradingApi'
 
@@ -68,6 +72,8 @@ type FillItem = {
   quantity: number
 }
 
+type WsStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
+
 type AlertItem = {
   id: string
   symbol: string
@@ -104,6 +110,12 @@ type LoginRecordItem = {
   status: string
 }
 
+type TradingPreferences = {
+  marketAutoRefresh?: 'auto' | 'manual'
+  marketBoard?: string
+  marketQuery?: string
+}
+
 type AccountSummary = FundsSnapshot & {
   account?: string
   fundAccountId?: string
@@ -126,6 +138,9 @@ const state = reactive({
   stockFlows: [] as StockFlowItem[],
   alerts: [] as AlertItem[],
   loginRecords: [] as LoginRecordItem[],
+  watchlist: [] as string[],
+  preferences: {} as TradingPreferences,
+  wsStatus: 'disconnected' as WsStatus,
   loading: {
     account: false,
     funds: false,
@@ -135,6 +150,8 @@ const state = reactive({
     flows: false,
     alerts: false,
     loginRecords: false,
+    watchlist: false,
+    preferences: false,
   },
   error: '' as string,
 })
@@ -213,6 +230,71 @@ const refreshFills = async () => {
   }
 }
 
+const handleOrderEvent = async (payload: FillItem) => {
+  await Promise.all([refreshOrders(), refreshFills(), refreshFunds(), refreshHoldings(), refreshFlows()])
+}
+
+let ws: WebSocket | null = null
+let wsPingTimer: ReturnType<typeof setInterval> | null = null
+
+const connectOrderStream = () => {
+  if (ws) return
+  const token = localStorage.getItem('trading-token')
+  if (!token) return
+  const envWsUrl = import.meta.env.VITE_TRADE_WS_URL as string | undefined
+  const baseUrl = import.meta.env.VITE_CLIENT_API_BASE || 'http://localhost:8000/api/client'
+  const wsUrl = envWsUrl || `${baseUrl.replace(/^http/, 'ws').replace('/api/client', '')}/api/v1/trade/ws/orders`
+  const url = wsUrl.includes('token=') ? wsUrl : `${wsUrl}?token=${encodeURIComponent(token)}`
+  state.wsStatus = 'connecting'
+  ws = new WebSocket(url)
+  ws.onopen = () => {
+    state.wsStatus = 'connected'
+    wsPingTimer = setInterval(() => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'ping', sent_at: new Date().toISOString() }))
+      }
+    }, 30000)
+  }
+  ws.onclose = () => {
+    state.wsStatus = 'disconnected'
+    ws = null
+    if (wsPingTimer) {
+      clearInterval(wsPingTimer)
+      wsPingTimer = null
+    }
+    setTimeout(() => {
+      if (localStorage.getItem('trading-token')) {
+        connectOrderStream()
+      }
+    }, 2000)
+  }
+  ws.onerror = () => {
+    state.wsStatus = 'error'
+  }
+  ws.onmessage = (event) => {
+    try {
+      const message = JSON.parse(event.data)
+      if (message?.type?.startsWith('order.') && message?.data) {
+        handleOrderEvent(message.data as FillItem)
+      }
+    } catch (error) {
+      return
+    }
+  }
+}
+
+const disconnectOrderStream = () => {
+  if (ws) {
+    ws.close()
+    ws = null
+  }
+  if (wsPingTimer) {
+    clearInterval(wsPingTimer)
+    wsPingTimer = null
+  }
+  state.wsStatus = 'disconnected'
+}
+
 const refreshFlows = async () => {
   state.loading.flows = true
   try {
@@ -253,6 +335,40 @@ const refreshLoginRecords = async () => {
   }
 }
 
+const refreshWatchlist = async () => {
+  state.loading.watchlist = true
+  try {
+    const data = await fetchWatchlist(resolveAccount())
+    state.watchlist = data.watchlist || []
+  } catch (error) {
+    setError(error instanceof Error ? error.message : '自选加载失败')
+  } finally {
+    state.loading.watchlist = false
+  }
+}
+
+const toggleWatchlist = async (symbol: string) => {
+  await apiToggleWatchlist(symbol, resolveAccount())
+  await refreshWatchlist()
+}
+
+const refreshPreferences = async () => {
+  state.loading.preferences = true
+  try {
+    const data = await fetchPreferences(resolveAccount())
+    state.preferences = (data.preferences || {}) as TradingPreferences
+  } catch (error) {
+    setError(error instanceof Error ? error.message : '偏好加载失败')
+  } finally {
+    state.loading.preferences = false
+  }
+}
+
+const updatePreferences = async (payload: TradingPreferences) => {
+  await updatePreferencesData({ account: resolveAccount(), ...payload })
+  state.preferences = { ...state.preferences, ...payload }
+}
+
 const refreshAll = async () => {
   await Promise.all([
     refreshAccount(),
@@ -263,6 +379,8 @@ const refreshAll = async () => {
     refreshFlows(),
     refreshAlerts(),
     refreshLoginRecords(),
+    refreshWatchlist(),
+    refreshPreferences(),
   ])
 }
 
@@ -359,6 +477,10 @@ const store = {
   refreshFlows,
   refreshAlerts,
   refreshLoginRecords,
+  refreshWatchlist,
+  toggleWatchlist,
+  refreshPreferences,
+  updatePreferences,
   refreshAll,
   placeOrder,
   cancelOrder,
@@ -372,6 +494,8 @@ const store = {
   recordLogin,
   availableFunds,
   holdingsMap,
+  connectOrderStream,
+  disconnectOrderStream,
 }
 
 export type {
@@ -385,6 +509,7 @@ export type {
   LoginRecordItem,
   HoldingItem,
   FundsSnapshot,
+  TradingPreferences,
 }
 
 export const useTradingStore = () => {

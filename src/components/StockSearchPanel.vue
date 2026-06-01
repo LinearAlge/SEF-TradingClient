@@ -1,33 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const emit = defineEmits(['search', 'reset', 'filters-change'])
+const emit = defineEmits(['search', 'reset'])
 
 const query = ref('')
 const board = ref('主板')
-const range = ref('今日')
-
-const filters = ['今日', '本周', '本月']
 
 const handleSearch = () => {
   emit('search', {
     query: query.value.trim(),
     board: board.value,
-    range: range.value,
   })
 }
 
 const handleReset = () => {
   query.value = ''
   board.value = '主板'
-  range.value = '今日'
   emit('reset')
-}
-
-const notifyFilters = () => {
-  emit('filters-change', {
-    range: range.value,
-  })
 }
 
 const handleEnter = (event: KeyboardEvent) => {
@@ -66,16 +55,6 @@ const handleEnter = (event: KeyboardEvent) => {
         <button class="btn btn-ghost" type="button" @click="handleReset">重置</button>
       </div>
     </div>
-    <div class="filter-row chips">
-      <span
-        v-for="item in filters"
-        :key="item"
-        :class="['chip', range === item ? 'chip-active' : '']"
-        @click="range = item; notifyFilters()"
-      >
-        {{ item }}
-      </span>
-    </div>
   </div>
 </template>
 
@@ -91,27 +70,7 @@ const handleEnter = (event: KeyboardEvent) => {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
-.filter-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .search-actions {
   justify-content: flex-end;
-}
-
-.chips {
-  gap: 10px;
-  align-items: center;
-  margin-top: 6px;
-}
-
-.chip {
-  cursor: pointer;
-}
-
-.chip-active {
-  border-color: var(--color-border-dark);
 }
 </style>
