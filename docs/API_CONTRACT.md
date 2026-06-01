@@ -1,16 +1,40 @@
 # API Contract
 
-本文档描述当前前端依赖的统一网关 API，以及 mock 外部服务接口。
+本文档描述当前统一网关 API（前端唯一调用入口）以及后端内部使用的 mock 外部服务接口。
 
-## 1. 统一网关 API（前端只调用这一个端口来访问所有后端服务）
+## 1. 统一网关 API
 
 Base URL: `VITE_CLIENT_API_BASE`（默认 http://localhost:8000/api/client）
 
-说明：登录后会返回 `token`，前端需保存并在后续请求头加入 `Authorization: Bearer <token>`。
+说明：登录后返回 `token`，前端保存并在请求头加入 `Authorization: Bearer <token>`。
 
-前端只调用统一网关；网关内部再去调用 SQLite 与 mock 外部服务。
+### 1.1 响应格式约定
 
-### POST /api/auth/login
+统一网关响应以 `ok` 为顶层成功标记，错误时携带 `code` 与 `message`。
+
+成功示例：
+```json
+{
+  "ok": true,
+  "code": "OK",
+  "message": "success",
+  "data": {}
+}
+```
+
+失败示例：
+```json
+{
+  "ok": false,
+  "code": "COMMON_BAD_REQUEST",
+  "message": "请求格式错误",
+  "data": null
+}
+```
+
+### 1.2 认证与证书
+
+#### POST /auth/login
 
 用途：登录，返回证书流程动作。
 
@@ -26,20 +50,26 @@ Response:
 ```json
 {
   "ok": true,
-  "action": "enroll"
+  "action": "enroll",
+  "token": "mock-token",
+  "investorId": "INV000001",
+  "fundAccountId": "FUND000001",
+  "securityAccountId": "SEC000001",
+  "expiresAt": "2026-05-30T04:19:47.321+08:00"
 }
 ```
 
-错误响应示例：
+失败示例（未开通权限）：
 ```json
 {
   "ok": false,
+  "code": "CLIENT_ACCESS_REQUIRED",
   "message": "未开通客户端权限，请先申请",
   "action": "apply"
 }
 ```
 
-### POST /api/auth/enroll
+#### POST /auth/enroll
 
 用途：首次登录绑定证书。
 
@@ -56,11 +86,15 @@ Response:
 {
   "ok": true,
   "token": "mock-token",
-  "user": {"name": "admin", "account": "admin"}
+  "user": {"name": "admin", "account": "admin"},
+  "investorId": "INV000001",
+  "fundAccountId": "FUND000001",
+  "securityAccountId": "SEC000001",
+  "expiresAt": "2026-05-30T04:19:47.321+08:00"
 }
 ```
 
-### POST /api/auth/verify
+#### POST /auth/verify
 
 用途：证书挑战验证。
 
@@ -77,11 +111,15 @@ Response:
 {
   "ok": true,
   "token": "mock-token",
-  "user": {"name": "admin", "account": "admin"}
+  "user": {"name": "admin", "account": "admin"},
+  "investorId": "INV000001",
+  "fundAccountId": "FUND000001",
+  "securityAccountId": "SEC000001",
+  "expiresAt": "2026-05-30T04:19:47.321+08:00"
 }
 ```
 
-### POST /api/auth/rebind
+#### POST /auth/rebind
 
 用途：重绑证书（使用资金账户身份校验）。
 
@@ -99,12 +137,11 @@ Response:
 ```json
 {
   "ok": true,
-  "message": "证书已重置，请重新登录绑定证书",
-  "user": {"name": "admin", "account": "admin"}
+  "message": "证书已重置，请重新登录绑定证书"
 }
 ```
 
-### GET /api/auth/me
+#### GET /auth/me
 
 用途：查询客户端账户信息。
 
@@ -121,7 +158,9 @@ Response:
 }
 ```
 
-### POST /api/client/applications
+### 1.3 客户端申请
+
+#### POST /client/applications
 
 用途：申请客户端权限。
 
@@ -144,7 +183,7 @@ Response:
 }
 ```
 
-### GET /api/client/applications
+#### GET /client/applications
 
 用途：查询申请记录。
 
@@ -163,13 +202,15 @@ Response:
       "account": "admin",
       "type": "client-access",
       "status": "approved",
-      "created_at": "2026-05-30T04:00:00.000Z"
+      "createdAt": "2026-05-30T04:00:00.000Z"
     }
   ]
 }
 ```
 
-### GET /api/account/summary
+### 1.4 账户与资产
+
+#### GET /account/summary
 
 用途：资金 + 持仓合并摘要。
 
@@ -178,8 +219,6 @@ Response:
 {
   "ok": true,
   "account": "admin",
-  "fundAccountId": "CASH-20001",
-  "currency": "CNY",
   "available": 200000,
   "frozen": 0,
   "marketValue": 14853,
@@ -188,7 +227,7 @@ Response:
 }
 ```
 
-### GET /api/account/funds
+#### GET /account/funds
 
 用途：资金余额（已合并持仓市值）。
 
@@ -196,9 +235,6 @@ Response:
 ```json
 {
   "ok": true,
-  "account": "admin",
-  "fundAccountId": "CASH-20001",
-  "currency": "CNY",
   "available": 200000,
   "frozen": 0,
   "marketValue": 14853,
@@ -207,7 +243,7 @@ Response:
 }
 ```
 
-### GET /api/account/holdings
+#### GET /account/holdings
 
 用途：持仓。
 
@@ -215,10 +251,6 @@ Response:
 ```json
 {
   "ok": true,
-  "account": "admin",
-  "securitiesAccountId": "SEC-10001",
-  "asOf": "2026-05-30T04:16:18.736+08:00",
-  "totalMarketValue": 14853,
   "holdings": [
     {
       "symbol": "600001",
@@ -231,11 +263,13 @@ Response:
       "pnlAmount": -302,
       "pnlRate": -0.01
     }
-  ]
+  ],
+  "totalMarketValue": 14853,
+  "asOf": "2026-05-30T04:16:18.736+08:00"
 }
 ```
 
-### GET /api/account/cash-flows
+#### GET /account/cash-flows
 
 用途：资金流水。
 
@@ -249,7 +283,7 @@ Response:
 }
 ```
 
-### GET /api/account/stock-flows
+#### GET /account/stock-flows
 
 用途：证券流水。
 
@@ -263,7 +297,7 @@ Response:
 }
 ```
 
-### POST /api/account/funds/deposit
+#### POST /account/funds/deposit
 
 Request Body:
 ```json
@@ -275,7 +309,7 @@ Response:
 {"ok": true}
 ```
 
-### POST /api/account/funds/withdraw
+#### POST /account/funds/withdraw
 
 Request Body:
 ```json
@@ -287,7 +321,7 @@ Response:
 {"ok": true}
 ```
 
-### POST /api/account/passwords/trade
+#### POST /account/passwords/trade
 
 Request Body:
 ```json
@@ -299,7 +333,7 @@ Response:
 {"ok": true}
 ```
 
-### POST /api/account/passwords/withdraw
+#### POST /account/passwords/withdraw
 
 Request Body:
 ```json
@@ -311,7 +345,47 @@ Response:
 {"ok": true}
 ```
 
-### POST /api/trade/orders
+### 1.5 行情
+
+#### GET /market/stocks
+
+Query 示例：
+```
+query=6000&board=主板
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "asOf": "2026-05-30T04:19:47.321+08:00",
+  "stocks": [
+    {"symbol": "600001", "name": "石英系统", "lastPrice": 149.17, "bid": 149.02, "ask": 149.32}
+  ]
+}
+```
+
+#### GET /market/quotes
+
+Query 示例：
+```
+symbols=600001,600002
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "asOf": "2026-05-30T04:19:47.321+08:00",
+  "stocks": [
+    {"symbol": "600001", "name": "石英系统", "lastPrice": 149.17}
+  ]
+}
+```
+
+### 1.6 委托与成交
+
+#### POST /trade/orders
 
 用途：提交买卖委托。
 
@@ -339,7 +413,7 @@ Response:
 }
 ```
 
-### POST /api/trade/orders/:id/cancel
+#### POST /trade/orders/{id}/cancel
 
 Response:
 ```json
@@ -349,7 +423,7 @@ Response:
 }
 ```
 
-### GET /api/trade/orders
+#### GET /trade/orders
 
 Response:
 ```json
@@ -371,7 +445,7 @@ Response:
 }
 ```
 
-### GET /api/trade/fills
+#### GET /trade/fills
 
 Response:
 ```json
@@ -391,43 +465,9 @@ Response:
 }
 ```
 
-### GET /api/market/stocks
+### 1.7 提醒与用户数据
 
-Query 示例：
-```
-query=6000&board=主板
-```
-
-Response:
-```json
-{
-  "ok": true,
-  "asOf": "2026-05-30T04:19:47.321+08:00",
-  "stocks": [
-    {"symbol": "600001", "name": "石英系统", "lastPrice": 149.17, "bid": 149.02, "ask": 149.32}
-  ]
-}
-```
-
-### GET /api/market/quotes
-
-Query 示例：
-```
-symbols=600001,600002
-```
-
-Response:
-```json
-{
-  "ok": true,
-  "asOf": "2026-05-30T04:19:47.321+08:00",
-  "stocks": [
-    {"symbol": "600001", "name": "石英系统", "lastPrice": 149.17}
-  ]
-}
-```
-
-### GET /api/client/alerts
+#### GET /client/alerts
 
 Response:
 ```json
@@ -447,7 +487,7 @@ Response:
 }
 ```
 
-### POST /api/client/alerts
+#### POST /client/alerts
 
 Request Body:
 ```json
@@ -470,7 +510,7 @@ Response:
 }
 ```
 
-### PATCH /api/client/alerts/:id
+#### PATCH /client/alerts/{id}
 
 Request Body:
 ```json
@@ -482,49 +522,49 @@ Response:
 {"ok": true, "alert": {"id": 1, "status": "已暂停"}}
 ```
 
-### DELETE /api/client/alerts/:id
+#### DELETE /client/alerts/{id}
 
 Response:
 ```json
 {"ok": true}
 ```
 
-### GET /api/client/notifications
+#### GET /client/notifications
 
 Response:
 ```json
 {"ok": true, "notifications": []}
 ```
 
-### PATCH /api/client/notifications/:id/read
+#### PATCH /client/notifications/{id}/read
 
 Response:
 ```json
 {"ok": true}
 ```
 
-### GET /api/client/watchlist
+#### GET /client/watchlist
 
 Response:
 ```json
 {"ok": true, "watchlist": ["600001", "600002"]}
 ```
 
-### POST /api/client/watchlist/:symbol/toggle
+#### POST /client/watchlist/{symbol}/toggle
 
 Response:
 ```json
 {"ok": true, "enabled": true}
 ```
 
-### GET /api/client/preferences
+#### GET /client/preferences
 
 Response:
 ```json
 {"ok": true, "preferences": {}}
 ```
 
-### PATCH /api/client/preferences
+#### PATCH /client/preferences
 
 Request Body:
 ```json
@@ -536,7 +576,7 @@ Response:
 {"ok": true}
 ```
 
-### POST /api/client/login-records
+#### POST /client/login-records
 
 Request Body:
 ```json
@@ -548,7 +588,7 @@ Response:
 {"ok": true}
 ```
 
-### GET /api/client/login-records
+#### GET /client/login-records
 
 Response:
 ```json
@@ -592,7 +632,7 @@ Response:
 - GET /api/v1/admin/stocks/{stock_code}/rule
 - GET /api/v1/admin/trading-day/status
 
-## 3. 字段约定
+## 3. 字段与状态约定
 
 - account：资金账户号
 - fundAccountId：资金账户编号
@@ -620,14 +660,20 @@ Response:
 - 委托状态：未成交、部分成交、已成交、已撤单、已过期、已拒绝
 - 提醒状态：监控中、已暂停、已触发
 
-## 5. 错误格式
+## 4. 与 V2 接口约定的关系
 
-当前统一错误格式：
+- 当前统一网关是客户端组内部集成层，外部联调时由 adapters 切换到真实 V2 接口。
+- `/api/client/*` 保持稳定，便于前端不改动即可接入真实服务。
+- mock 接口字段与 V2 统一响应格式已对齐（`success/code/message/data`），网关输出仍使用 `ok` 以匹配当前前端。
+
+## 5. 错误码与响应
+
+网关错误响应包含 `code` 与 `message`，前端按 `ok` 判断失败：
 ```json
 {
   "ok": false,
-  "message": "错误信息"
+  "code": "TRADE_E05",
+  "message": "价格非法或超出涨跌停范围",
+  "data": null
 }
 ```
-
-如需更强规范，建议未来增加 `code` 字段。

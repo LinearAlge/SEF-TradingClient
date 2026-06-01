@@ -64,10 +64,13 @@ npm run dev
 - `start-unified.cmd`：一键启动 FastAPI + 前端（Windows）
 - `stop-unified.cmd`：停止本地 FastAPI + 前端（Windows）
 - `reset-client-db.cmd`：删除客户端 SQLite 数据库 / 重置客户端数据状态（如权限重置、登录状态重置等，用于测试）
-
+- `reset-trade-data.cmd`：重置 mock 交易相关 JSON 数据
 ## 文档入口
 
+- docs/DOCS_INDEX.md
 - docs/PROJECT_GUIDE.md
 - docs/BACKEND_ARCHITECTURE.md
 - docs/API_CONTRACT.md
 - docs/TESTING_GUIDE.md
+- docs/INTEGRATION_GUIDE.md
+- docs/DEVELOPMENT_GUIDE.md

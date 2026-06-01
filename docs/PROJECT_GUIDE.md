@@ -2,7 +2,7 @@
 
 ## 1. 背景与目标
 
-本项目是“股票交易系统实验”的客户端部分实现，目标是提供交易客户端前端与客户端自有后端，并以 mock 外部服务完成独立跑通与联调前测试。完整系统应包含：
+本项目是“股票交易系统实验”的客户端实现，目标是提供交易客户端前端与客户端自有后端，并以 mock 外部服务完成独立跑通与联调前测试。完整系统应包含：
 
 - 证券账户业务（外部系统）
 - 资金账户业务（外部系统）
@@ -35,7 +35,7 @@ src/services/clientApi.ts
 /api/v1/* mock routers（ACCOUNT/TRADE/INFO/ADMIN）
 ```
 
-说明：前端只调用统一网关 `VITE_CLIENT_API_BASE`，默认指向 FastAPI 后端的 `/api/client`。后期联调时只需要替换 adapters 的 base URL 或实现，不需要改前端。
+说明：前端只调用统一网关 `VITE_CLIENT_API_BASE`，默认指向 FastAPI 后端的 `/api/client`。联调时只需替换 adapters 的实现或 base URL，不需要改前端。
 
 ## 3. 前端结构说明
 
@@ -55,7 +55,7 @@ src/services/clientApi.ts
   - API：/api/client/auth/login | /api/client/auth/enroll | /api/client/auth/verify | /api/client/auth/rebind | /api/client/client/applications
   - 说明：登录失败仅在 `action=apply` 时展示申请面板
 - DashboardView：首页工作台
-  - API：/api/client/account/funds | /api/client/account/holdings | /api/client/trade/orders | /api/client/trade/fills | /api/client/client/alerts
+  - API：/api/client/account/summary | /api/client/account/holdings | /api/client/trade/orders | /api/client/trade/fills | /api/client/client/alerts
   - 说明：展示资金、持仓、市值、委托与成交
 - MarketView：行情中心
   - API：/api/client/market/stocks
@@ -64,7 +64,7 @@ src/services/clientApi.ts
   - API：/api/client/trade/orders
   - 说明：前端完成基础风控校验，提交后刷新资金/持仓/委托
 - OrdersView：委托与成交
-  - API：/api/client/trade/orders | /api/client/trade/fills | /api/client/trade/orders/:id/cancel
+  - API：/api/client/trade/orders | /api/client/trade/fills | /api/client/trade/orders/{id}/cancel
   - 说明：支持批量撤单
 - AccountView：资产与流水
   - API：/api/client/account/funds | /api/client/account/holdings | /api/client/account/cash-flows | /api/client/account/stock-flows
@@ -96,7 +96,7 @@ src/services/clientApi.ts
 - backend_fastapi/mock_modules/info_router.py
 - backend_fastapi/mock_modules/admin_router.py
 
-这些 mock routers 模拟外部系统，便于独立开发与测试。后期联调时应替换为真实接口。
+这些 mock routers 模拟外部系统，便于独立开发与测试。联调时应替换为真实接口。
 
 ## 5. 数据流说明
 
@@ -124,15 +124,17 @@ src/services/clientApi.ts
 ### 5.4 买入/卖出委托
 
 1. 前端 /api/client/trade/orders 提交委托
-2. mock trade 撮合，生成订单与成交回报
-3. CLIENT 模块收到 fills，调用 mock account 结算
-4. 前端刷新资金/持仓/委托/成交
+2. CLIENT 模块先冻结资金/持仓并校验涨跌停
+3. mock trade 受理并撮合，生成订单与成交回报
+4. CLIENT 模块根据成交结果调用 mock account 结算
+5. 前端刷新资金/持仓/委托/成交
 
 ### 5.5 撤单
 
-1. 前端调用 /api/client/trade/orders/:id/cancel
+1. 前端调用 /api/client/trade/orders/{id}/cancel
 2. mock trade 更新委托状态
-3. 前端刷新委托列表与资产
+3. CLIENT 模块释放冻结资金/持仓
+4. 前端刷新委托列表与资产
 
 ### 5.6 资产/持仓/流水刷新
 
@@ -144,8 +146,8 @@ src/services/clientApi.ts
 
 1. 新增提醒 /api/client/alerts
 2. 提醒列表中刷新行情，满足条件则状态改为已触发
-3. 更新提醒 /api/client/alerts/:id
-4. 删除提醒 /api/client/alerts/:id
+3. 更新提醒 /api/client/alerts/{id}
+4. 删除提醒 /api/client/alerts/{id}
 
 ### 5.8 修改密码
 
@@ -159,4 +161,4 @@ src/services/clientApi.ts
 - 撮合逻辑是简化版，不包含真实撮合优先级与撮合队列
 - 资金冻结/解冻逻辑当前仅在成交后调整
 - SQLite 仅用于客户端自有数据
-- 后期联调时仅需替换 adapters 的 base URL 或实现，不应修改前端页面
+- 联调时仅需替换 adapters 的实现或 base URL，不应修改前端页面

@@ -118,7 +118,7 @@ npm run dev
 - 登录失败：确认是否已申请客户端权限（第一次登录会要求申请）
 - 证书验证失败：清理浏览器 IndexedDB 后重新登录
 - 行情无数据：检查 mock market 数据是否存在
-- 委托不刷新：确认 WebSocket 已连接，必要时刷新页面
+- 委托不刷新：当前版本不依赖 WebSocket，必要时刷新页面
 - 委托提交失败：检查 mock exchange 服务是否运行
 - SQLite 相关错误：运行 `reset-client-db.cmd` 后重启网关
 
@@ -136,3 +136,10 @@ npm run dev
   - backend_fastapi/mock_modules/data/mock-exchange-db.json
 
 重置后重启网关与 mock 服务。
+
+## 9. 接口验证要点
+
+- 网关响应成功标记为 `ok: true`，失败为 `ok: false`
+- 失败时包含 `code` 与 `message`
+- 资金/持仓刷新依赖 `/api/client/account/funds` 与 `/api/client/account/holdings`
+- 行情刷新依赖 `/api/client/market/stocks` 与 `/api/client/market/quotes`
