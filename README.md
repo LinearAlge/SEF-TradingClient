@@ -65,6 +65,9 @@ npm run dev
 - `stop-unified.cmd`：停止本地 FastAPI + 前端（Windows）
 - `reset-client-db.cmd`：删除客户端 SQLite 数据库 / 重置客户端数据状态（如权限重置、登录状态重置等，用于测试）
 - `reset-trade-data.cmd`：重置 mock 交易相关 JSON 数据
+- `npm test`：运行全部自动化 API 测试（pytest，需先启动后端）
+- `npm run test:watch`：测试详细模式（含完整错误堆栈）
+
 ## 文档入口
 
 - docs/DOCS_INDEX.md
@@ -74,3 +77,5 @@ npm run dev
 - docs/TESTING_GUIDE.md
 - docs/INTEGRATION_GUIDE.md
 - docs/DEVELOPMENT_GUIDE.md
+- docs/AUTO_TEST_GUIDE.md
+- docs/测试报告.md

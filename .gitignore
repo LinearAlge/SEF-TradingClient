@@ -37,3 +37,24 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# pytest
+.pytest_cache/
+
+# Claude Code (local config)
+.claude/
+
+# Temp & system files
+.gateway-pids.txt
+*.sqlite-shm
+*.sqlite-wal
+
+# Report assets (not needed in repo — report is submitted separately as PDF)
+docs/*.png
+docs/*.docx
+测试报告模板*.pdf
